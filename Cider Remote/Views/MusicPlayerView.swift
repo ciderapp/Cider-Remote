@@ -895,7 +895,7 @@ class MusicPlayerViewModel: ObservableObject {
     /// The "Now Playing" activity
     @Published var nowPlaying: NowPlaying? = nil
     /// Everything Live Activity for the playing song
-    @Published var liveActivity: LiveActivityManager = .init()
+    @Published var liveActivity: LiveActivityManager = LiveActivityManager.shared
     @Published var queueItems: [Track] = []
     @Published var currentTrack: Track?
     @Published var isPlaying: Bool = false
@@ -921,7 +921,7 @@ class MusicPlayerViewModel: ObservableObject {
     
     private var colorSchemeManager: ColorSchemeManager
 
-    init(device: Device, colorSchemeManager: ColorSchemeManager) {
+    init(device: Device, colorSchemeManager: ColorSchemeManager = .init()) {
         self.device = device
         self.colorSchemeManager = colorSchemeManager
         self.volumeDebouncer = Debouncer(delay: 0.3) { [weak self] in
@@ -936,6 +936,7 @@ class MusicPlayerViewModel: ObservableObject {
                 await self.seekToTimeDebounced()
             }
         }
+        self.liveActivity.device = device
     }
 
     func startListening() {
@@ -963,6 +964,8 @@ class MusicPlayerViewModel: ObservableObject {
                 if let currentTrack = self?.currentTrack {
                     self!.liveActivity.startActivity(using: currentTrack)
                 }
+
+                AppDelegate.shared.scheduleAppRefresh()
             }
         }
 
@@ -973,7 +976,7 @@ class MusicPlayerViewModel: ObservableObject {
                 print("Invalid playback data received")
                 return
             }
-            
+
             print("Received playback event: \(type)")
             
             DispatchQueue.main.async {
@@ -1156,12 +1159,12 @@ class MusicPlayerViewModel: ObservableObject {
 
             var data: Data? = nil
 
-            Task {
-                let image = await self.loadImage(for: URL(string: artworkUrl)!)
-                if let imgData = image?.pngData() {
-                    data = imgData
-                }
-            }
+//            Task {
+//                let image = await self.loadImage(for: URL(string: artworkUrl)!)
+//                if let imgData = image?.pngData() {
+//                    data = imgData
+//                }
+//            }
 
             let newTrack = Track(id: id,
                                  title: title,

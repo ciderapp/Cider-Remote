@@ -108,6 +108,14 @@ struct SettingsView: View {
                     Text("Made with ❤️ by cryptofyre")
                         .font(.footnote)
                         .foregroundColor(.secondary)
+
+                    NavigationLink {
+                        ContributorsView()
+                    } label: {
+                        Text("With the help of contributors")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             .listStyle(InsetGroupedListStyle())

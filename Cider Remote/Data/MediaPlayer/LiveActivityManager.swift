@@ -7,6 +7,10 @@ import ActivityKit
 class LiveActivityManager {
     @AppStorage("alertLiveActivity") private var alertLiveActivity: Bool = true
 
+    static let shared: LiveActivityManager = .init()
+
+    var device: Device? = nil
+
     var lastActivity: Activity<NowPlayingLiveActivity.NowPlayingAttributes>? = nil
     var activity: Activity<NowPlayingLiveActivity.NowPlayingAttributes>? {
         return Activity<NowPlayingLiveActivity.NowPlayingAttributes>.activities.first
