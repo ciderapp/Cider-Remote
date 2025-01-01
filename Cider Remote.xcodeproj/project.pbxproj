@@ -7,44 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B91F152A2CF9056400A549B1 /* ContributorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91F15292CF9056400A549B1 /* ContributorsView.swift */; };
 		B91F152B2CF9056400A549B1 /* ContributorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91F15292CF9056400A549B1 /* ContributorsView.swift */; };
 		B9A455622CC51C19006AEB89 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = B9A455612CC51C19006AEB89 /* SocketIO */; };
 		B9A455652CC51C4C006AEB89 /* ColorSchemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A455642CC51C4C006AEB89 /* ColorSchemeManager.swift */; };
 		B9A455672CC5309D006AEB89 /* Font+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A455662CC5309D006AEB89 /* Font+Extension.swift */; };
-		B9C2675E2CC8F301000BC44B /* LifeSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9C2675D2CC8F2FE000BC44B /* LifeSaver.swift */; };
 		B9CDA82C2CC67C1200FBF580 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82B2CC67C1200FBF580 /* ButtonStyles.swift */; };
 		B9CDA82E2CC67C9A00FBF580 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82D2CC67C9A00FBF580 /* Track.swift */; };
 		B9CDA8302CC67CAC00FBF580 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82F2CC67CAC00FBF580 /* Network.swift */; };
 		B9CDA8322CC67D2E00FBF580 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8312CC67D2E00FBF580 /* CustomSlider.swift */; };
 		B9CDA8352CC67DCF00FBF580 /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8342CC67DCF00FBF580 /* NowPlaying.swift */; };
-		B9CDA83D2CC686AA00FBF580 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83C2CC686AA00FBF580 /* WidgetKit.framework */; };
-		B9CDA83F2CC686AA00FBF580 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83E2CC686AA00FBF580 /* SwiftUI.framework */; };
-		B9CDA84C2CC686AC00FBF580 /* NowPlayingExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		B9CDA8592CC686B500FBF580 /* NowPlayingBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8552CC686B500FBF580 /* NowPlayingBundle.swift */; };
-		B9CDA85A2CC686B500FBF580 /* NowPlayingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8562CC686B500FBF580 /* NowPlayingLiveActivity.swift */; };
-		B9CDA85B2CC686B500FBF580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9CDA8522CC686B500FBF580 /* Assets.xcassets */; };
-		B9CDA85D2CC686F700FBF580 /* MusicPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D2892C2CC51497008543A7 /* MusicPlayerView.swift */; };
-		B9CDA85F2CC6870800FBF580 /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8342CC67DCF00FBF580 /* NowPlaying.swift */; };
 		B9CDA8612CC68BA400FBF580 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8602CC68BA400FBF580 /* LiveActivityManager.swift */; };
 		B9CDA8632CC68C0500FBF580 /* NowPlayingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8562CC686B500FBF580 /* NowPlayingLiveActivity.swift */; };
-		B9CDA8672CC68F3C00FBF580 /* ColorSchemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A455642CC51C4C006AEB89 /* ColorSchemeManager.swift */; };
-		B9CDA8682CC68F3C00FBF580 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82F2CC67CAC00FBF580 /* Network.swift */; };
-		B9CDA8692CC68F3C00FBF580 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8602CC68BA400FBF580 /* LiveActivityManager.swift */; };
-		B9CDA86A2CC68F3C00FBF580 /* Font+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A455662CC5309D006AEB89 /* Font+Extension.swift */; };
-		B9CDA86B2CC68F3C00FBF580 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82D2CC67C9A00FBF580 /* Track.swift */; };
-		B9CDA86C2CC68F4E00FBF580 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8312CC67D2E00FBF580 /* CustomSlider.swift */; };
-		B9CDA86D2CC68F4E00FBF580 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D289332CC5169A008543A7 /* SettingsView.swift */; };
-		B9CDA86E2CC68F4E00FBF580 /* ListHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D289352CC5182D008543A7 /* ListHelper.swift */; };
-		B9CDA86F2CC68F4E00FBF580 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D2892B2CC51497008543A7 /* ContentView.swift */; };
-		B9CDA8702CC68F4E00FBF580 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA82B2CC67C1200FBF580 /* ButtonStyles.swift */; };
 		B9CDA8722CC68F6C00FBF580 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8712CC68F6C00FBF580 /* Device.swift */; };
-		B9CDA8732CC68F6C00FBF580 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8712CC68F6C00FBF580 /* Device.swift */; };
 		B9CDA8752CC68F9D00FBF580 /* ConnectionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8742CC68F9D00FBF580 /* ConnectionInfo.swift */; };
-		B9CDA8762CC68F9D00FBF580 /* ConnectionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8742CC68F9D00FBF580 /* ConnectionInfo.swift */; };
-		B9CDA8782CC68FF600FBF580 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8772CC68FF600FBF580 /* AddDeviceView.swift */; };
 		B9CDA8792CC68FF600FBF580 /* AddDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA8772CC68FF600FBF580 /* AddDeviceView.swift */; };
-		B9CDA87B2CC6905C00FBF580 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = B9CDA87A2CC6905C00FBF580 /* SocketIO */; };
 		B9CDA87D2CC69A7300FBF580 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA87C2CC69A7300FBF580 /* AppDelegate.swift */; };
 		B9D289202CC51493008543A7 /* Cider_RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D2891E2CC51493008543A7 /* Cider_RemoteTests.swift */; };
 		B9D289242CC51495008543A7 /* Cider_RemoteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D289212CC51495008543A7 /* Cider_RemoteUITests.swift */; };
@@ -59,13 +35,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		B9CDA84A2CC686AC00FBF580 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA14E33F2C7CA1C200904A49 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B9CDA8392CC686AA00FBF580;
-			remoteInfo = NowPlayingExtension;
-		};
 		FA14E3582C7CA1C300904A49 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FA14E33F2C7CA1C200904A49 /* Project object */;
@@ -89,7 +58,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				B9CDA84C2CC686AC00FBF580 /* NowPlayingExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,7 +74,6 @@
 		B9CDA82F2CC67CAC00FBF580 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		B9CDA8312CC67D2E00FBF580 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		B9CDA8342CC67DCF00FBF580 /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
-		B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NowPlayingExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9CDA83C2CC686AA00FBF580 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B9CDA83E2CC686AA00FBF580 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		B9CDA8522CC686B500FBF580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -135,16 +102,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B9CDA8372CC686AA00FBF580 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B9CDA83F2CC686AA00FBF580 /* SwiftUI.framework in Frameworks */,
-				B9CDA83D2CC686AA00FBF580 /* WidgetKit.framework in Frameworks */,
-				B9CDA87B2CC6905C00FBF580 /* SocketIO in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FA14E3442C7CA1C200904A49 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -294,7 +251,6 @@
 				FA14E3472C7CA1C200904A49 /* Cider Remote.app */,
 				FA14E3572C7CA1C300904A49 /* Cider RemoteTests.xctest */,
 				FA14E3612C7CA1C300904A49 /* Cider RemoteUITests.xctest */,
-				B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -302,26 +258,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B9CDA8392CC686AA00FBF580 /* NowPlayingExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = B9CDA84E2CC686AC00FBF580 /* Build configuration list for PBXNativeTarget "NowPlayingExtension" */;
-			buildPhases = (
-				B9CDA8362CC686AA00FBF580 /* Sources */,
-				B9CDA8372CC686AA00FBF580 /* Frameworks */,
-				B9CDA8382CC686AA00FBF580 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = NowPlayingExtension;
-			packageProductDependencies = (
-				B9CDA87A2CC6905C00FBF580 /* SocketIO */,
-			);
-			productName = NowPlayingExtension;
-			productReference = B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		FA14E3462C7CA1C200904A49 /* Cider Remote */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA14E36B2C7CA1C300904A49 /* Build configuration list for PBXNativeTarget "Cider Remote" */;
@@ -334,7 +270,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				B9CDA84B2CC686AC00FBF580 /* PBXTargetDependency */,
 			);
 			name = "Cider Remote";
 			packageProductDependencies = (
@@ -394,9 +329,6 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					B9CDA8392CC686AA00FBF580 = {
-						CreatedOnToolsVersion = 16.0;
-					};
 					FA14E3462C7CA1C200904A49 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -431,20 +363,11 @@
 				FA14E3462C7CA1C200904A49 /* Cider Remote */,
 				FA14E3562C7CA1C300904A49 /* Cider RemoteTests */,
 				FA14E3602C7CA1C300904A49 /* Cider RemoteUITests */,
-				B9CDA8392CC686AA00FBF580 /* NowPlayingExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B9CDA8382CC686AA00FBF580 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B9CDA85B2CC686B500FBF580 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FA14E3452C7CA1C200904A49 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -471,32 +394,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B9CDA8362CC686AA00FBF580 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B9CDA86C2CC68F4E00FBF580 /* CustomSlider.swift in Sources */,
-				B9CDA86D2CC68F4E00FBF580 /* SettingsView.swift in Sources */,
-				B9CDA86E2CC68F4E00FBF580 /* ListHelper.swift in Sources */,
-				B9CDA8782CC68FF600FBF580 /* AddDeviceView.swift in Sources */,
-				B91F152A2CF9056400A549B1 /* ContributorsView.swift in Sources */,
-				B9CDA86F2CC68F4E00FBF580 /* ContentView.swift in Sources */,
-				B9CDA8702CC68F4E00FBF580 /* ButtonStyles.swift in Sources */,
-				B9CDA8672CC68F3C00FBF580 /* ColorSchemeManager.swift in Sources */,
-				B9CDA8682CC68F3C00FBF580 /* Network.swift in Sources */,
-				B9CDA8692CC68F3C00FBF580 /* LiveActivityManager.swift in Sources */,
-				B9CDA86A2CC68F3C00FBF580 /* Font+Extension.swift in Sources */,
-				B9CDA8732CC68F6C00FBF580 /* Device.swift in Sources */,
-				B9CDA86B2CC68F3C00FBF580 /* Track.swift in Sources */,
-				B9CDA8762CC68F9D00FBF580 /* ConnectionInfo.swift in Sources */,
-				B9C2675E2CC8F301000BC44B /* LifeSaver.swift in Sources */,
-				B9CDA8592CC686B500FBF580 /* NowPlayingBundle.swift in Sources */,
-				B9CDA85F2CC6870800FBF580 /* NowPlaying.swift in Sources */,
-				B9CDA85D2CC686F700FBF580 /* MusicPlayerView.swift in Sources */,
-				B9CDA85A2CC686B500FBF580 /* NowPlayingLiveActivity.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FA14E3432C7CA1C200904A49 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -543,11 +440,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		B9CDA84B2CC686AC00FBF580 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = B9CDA8392CC686AA00FBF580 /* NowPlayingExtension */;
-			targetProxy = B9CDA84A2CC686AC00FBF580 /* PBXContainerItemProxy */;
-		};
 		FA14E3592C7CA1C300904A49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FA14E3462C7CA1C200904A49 /* Cider Remote */;
@@ -561,62 +453,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		B9CDA84F2CC686AC00FBF580 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HB5P3BML86;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NowPlaying/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = NowPlaying;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote.NowPlaying";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		B9CDA8502CC686AC00FBF580 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HB5P3BML86;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NowPlaying/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = NowPlaying;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote.NowPlaying";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		FA14E3692C7CA1C300904A49 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -891,15 +727,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B9CDA84E2CC686AC00FBF580 /* Build configuration list for PBXNativeTarget "NowPlayingExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B9CDA84F2CC686AC00FBF580 /* Debug */,
-				B9CDA8502CC686AC00FBF580 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		FA14E3422C7CA1C200904A49 /* Build configuration list for PBXProject "Cider Remote" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -959,11 +786,6 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		B9A455612CC51C19006AEB89 /* SocketIO */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B9A455602CC51C19006AEB89 /* XCRemoteSwiftPackageReference "socket" */;
-			productName = SocketIO;
-		};
-		B9CDA87A2CC6905C00FBF580 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B9A455602CC51C19006AEB89 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
