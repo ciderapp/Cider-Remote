@@ -9,6 +9,8 @@ import SwiftUI
 import UIKit
 import SocketIO
 import Combine
+import AVFoundation
+import MediaPlayer
 
 struct MusicPlayerView: View {
     @Environment(\.colorScheme) private var systemColorScheme
@@ -920,6 +922,9 @@ class MusicPlayerViewModel: ObservableObject {
     private var lyricCache: [String: [LyricLine]] = [:]
     
     private var colorSchemeManager: ColorSchemeManager
+    
+    private static let silenceAsset: NSDataAsset? = NSDataAsset(name: "silence")
+    private var silentPlayer: AVAudioPlayer?
 
     init(device: Device, colorSchemeManager: ColorSchemeManager = .init()) {
         self.device = device
@@ -937,9 +942,86 @@ class MusicPlayerViewModel: ObservableObject {
             }
         }
         self.liveActivity.device = device
+        
+        setupAudioSession()
+        setupSilentAudioPlayer()
+        setupRemoteCommandCenter()
+        updateNowPlayingInfo()
+    }
+    
+    private func setupRemoteCommandCenter() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+        
+        commandCenter.playCommand.addTarget { [weak self] event in
+            Task {
+                await self?.togglePlayPause()
+            }
+            return .success
+        }
+        
+        commandCenter.pauseCommand.addTarget { [weak self] event in
+            Task {
+                await self?.togglePlayPause()
+            }
+            return .success
+        }
+        
+        commandCenter.nextTrackCommand.addTarget { [weak self] event in
+            Task {
+                await self?.nextTrack()
+            }
+            return .success
+        }
+        
+        commandCenter.previousTrackCommand.addTarget { [weak self] event in
+            Task {
+                await self?.previousTrack()
+            }
+            return .success
+        }
+        
+        commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+            guard let self = self,
+                  let event = event as? MPChangePlaybackPositionCommandEvent else {
+                return .commandFailed
+            }
+            
+            self.currentTime = event.positionTime
+            Task {
+                await self.seekToTime()
+            }
+            return .success
+        }
+    }
+    
+    private func setupAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to setup audio session: \(error)")
+        }
+    }
+    
+    private func setupSilentAudioPlayer() {
+        guard let silenceData = MusicPlayerViewModel.silenceAsset?.data else {
+            print("Could not load silence asset")
+            return
+        }
+        
+        do {
+            silentPlayer = try AVAudioPlayer(data: silenceData)
+            silentPlayer?.numberOfLoops = -1 // Infinite loop
+            silentPlayer?.volume = 0.0
+            silentPlayer?.prepareToPlay()
+        } catch {
+            print("Failed to create audio player: \(error)")
+        }
     }
 
     func startListening() {
+        print("Attempting to start audio track")
+        silentPlayer?.play() // Start playing silent audio
         print("Attempting to connect to socket")
         let socketURL = device.connectionMethod == "tunnel"
             ? "https://\(device.host)"
@@ -949,6 +1031,47 @@ class MusicPlayerViewModel: ObservableObject {
 
         setupSocketEventHandlers()
         socket?.connect()
+    }
+    
+    private func updateNowPlayingInfo() {
+        guard let currentTrack = currentTrack else {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            return
+        }
+
+        var nowPlayingInfo = [String: Any]()
+        
+        // Set the basic metadata
+        nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrack.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrack.artist
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = currentTrack.album
+        
+        // Set the duration and current time
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        
+        // Set the playback rate (0.0 = paused, 1.0 = playing)
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        
+        // Load and set the artwork
+        if let artworkUrl = URL(string: currentTrack.artwork) {
+            Task {
+                if let image = await loadImage(for: artworkUrl) {
+                    let artwork = MPMediaItemArtwork(boundsSize: image.size) { size in
+                        return image
+                    }
+                    nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+                    
+                    // Update the now playing info on the main thread
+                    await MainActor.run {
+                        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+                    }
+                }
+            }
+        }
+        
+        // Set the initial info even without artwork
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
     private func setupSocketEventHandlers() {
@@ -1014,6 +1137,7 @@ class MusicPlayerViewModel: ObservableObject {
     func stopListening() {
         print("Disconnecting socket")
         socket?.disconnect()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
     func refreshCurrentTrack() {
@@ -1177,6 +1301,7 @@ class MusicPlayerViewModel: ObservableObject {
             if self.currentTrack != newTrack {
                 self.currentTrack = newTrack
                 self.needsColorUpdate = self.colorSchemeManager.useAdaptiveColors
+                updateNowPlayingInfo()
                 self.lyrics = [] // Clear lyrics when track changes
                 Task {
                     await self.fetchLyrics() // Fetch lyrics for the new track
@@ -1219,12 +1344,14 @@ class MusicPlayerViewModel: ObservableObject {
     func togglePlayPause() async {
         print("Toggling play/pause")
         isPlaying.toggle() // Immediately update UI
+        updateNowPlayingInfo()
         do {
             _ = try await sendRequest(endpoint: "playback/playpause", method: "POST")
             // Server confirmed the change, no need to update UI again
         } catch {
             // Revert the UI change if the server request failed
             isPlaying.toggle()
+            updateNowPlayingInfo()
             handleError(error)
         }
     }
