@@ -3,8 +3,6 @@
 import SwiftUI
 
 struct DevicesView: View {
-    @Environment(\.dismiss) private var dismiss: DismissAction
-
     @EnvironmentObject private var viewModel: DeviceListViewModel
 
     @AppStorage("autoRefresh") private var autoRefresh: Bool = true
@@ -12,6 +10,7 @@ struct DevicesView: View {
     @State private var scannedCode: String?
     @State private var isShowingScanner = false
     @State private var isShowingGuide = false
+    @State private var showingSettings = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -90,7 +89,7 @@ struct DevicesView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    dismiss()
+                    showingSettings.toggle()
                 } label: {
                     Image(systemName: "gear")
                 }
@@ -98,6 +97,9 @@ struct DevicesView: View {
         }
         .navigationDestination(for: Device.self) { device in
             LazyView(MusicPlayerView(device: device))
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
         .sheet(isPresented: $isShowingGuide) {
             ConnectionGuideView()

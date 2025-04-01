@@ -11,8 +11,6 @@ struct ContentView: View {
     @StateObject private var colorScheme = ColorSchemeManager()
     @StateObject private var deviceListViewModel = DeviceListViewModel()
 
-    @State private var showingSettings = false
-
     var body: some View {
         ZStack {
             NavigationStack {
@@ -44,9 +42,6 @@ struct ContentView: View {
         }
         .environmentObject(colorScheme)
         .environmentObject(deviceListViewModel)
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
-        }
     }
 }
 
