@@ -70,14 +70,12 @@ struct Prompt {
                         Button("Cancel") {
                             dismiss()
                         }
-                        .buttonStyle(SecondaryButtonStyle())
                     }
 
                     Button(self.actionLabel) {
                         self.action()
                         dismiss()
                     }
-                    .buttonStyle(PrimaryButtonStyle())
                 }
             }
         }

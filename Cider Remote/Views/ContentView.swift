@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var colorScheme = ColorSchemeManager()
-
     @State private var showingSettings = false
     @StateObject private var prompt: AppPrompt = .shared
 
@@ -51,7 +49,6 @@ struct ContentView: View {
                 }
             }
         }
-        .environmentObject(colorScheme)
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }

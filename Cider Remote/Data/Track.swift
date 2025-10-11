@@ -49,11 +49,12 @@ struct Track: Codable, Equatable {
         self.songHref = library.href
     }
 
-    func getArtwork() async -> UIImage? {
+    mutating func getArtwork() async -> UIImage? {
         do {
             let url: URL = URL(string: self.artwork)!
             let (data, _) = try await URLSession.shared.data(from: url)
             if let image = UIImage(data: data) {
+                self.artworkData = data
                 return image
             }
         } catch {
@@ -62,23 +63,7 @@ struct Track: Codable, Equatable {
         return nil
     }
 
-    func getArtwork() -> UIImage? {
-        var ui: UIImage? = nil
-        Task {
-            do {
-                let url: URL = URL(string: self.artwork)!
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let image = UIImage(data: data) {
-                    ui = image
-                }
-            } catch {
-                print("Error loading image: \(error)")
-            }
-        }
-        return ui
-    }
-
-    func getArtwork() -> UIImage {
+    func getArtworkLocally() -> UIImage {
         return UIImage(data: self.artworkData) ?? UIImage.logo
     }
 
@@ -160,14 +145,14 @@ struct Track: Codable, Equatable {
             self.cached = try container.decodeIfPresent(Bool.self, forKey: Track.MxmLyrics.CodingKeys.cached)
         }
 
-        func decodeHtml() -> [LyricLine] {
-            guard let data = self.body.data(using: .utf8) else { return [] }
-            let xmlParser = XMLParser(data: data)
-            let ttmlParser = Parser(provider: .mxm)
-            xmlParser.delegate = ttmlParser
-            xmlParser.parse()
-            return ttmlParser.lyrics
-        }
+//        func decodeHtml() -> [LyricLine] {
+//            guard let data = self.body.data(using: .utf8) else { return [] }
+//            let xmlParser = XMLParser(data: data)
+//            let ttmlParser = Parser(provider: .mxm)
+//            xmlParser.delegate = ttmlParser
+//            xmlParser.parse()
+//            return ttmlParser.lyrics
+//        }
 
         private func decodeHtml() -> [(start: Double, end: Double, line: String)]? {
             guard let p = self.body.matches(of: /<p .+<\/p>/).first else { return nil }

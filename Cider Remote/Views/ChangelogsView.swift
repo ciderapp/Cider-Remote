@@ -290,6 +290,20 @@ struct Changelog: Hashable, Identifiable {
 // MARK: Changelogs are HERE
 
 extension Changelog {
+    /// Remote 4.0.0
+    static var v400: Changelog {
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa"])
+        temp = temp
+            .setChanges(additions: [
+                "Cider Collective team in the contributors screen"
+            ], modifications: [
+                "Contributors screen moved in the copyright section"
+            ], removals: [
+                "Removed \"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings"
+            ])
+        return temp
+    }
+
     /// Remote 3.1.0
     static var v310: Changelog {
         var temp = Changelog(version: "3.1.0", authors: ["Lumaa"], commits: "7b5dd1...main")
