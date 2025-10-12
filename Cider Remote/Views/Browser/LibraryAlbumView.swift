@@ -1,5 +1,6 @@
 // Made by Lumaa
 
+import AVKit
 import SwiftUI
 
 struct LibraryAlbumView: View {
@@ -8,9 +9,14 @@ struct LibraryAlbumView: View {
     @State var album: LibraryAlbum
 
     @State private var isLoading: Bool = true
+
     @State private var multiDisc: Bool = false
-    @State private var sharingTrack: LibraryTrack? = nil
     @State private var releaseDate: Date? = nil
+
+    @State private var player: AVPlayer? = nil
+    @State private var videoURL: String? = nil
+
+    @State private var sharingTrack: LibraryTrack? = nil
     @State private var sharingImage: UIImage? = nil
 
     init(_ album: LibraryAlbum) {
@@ -54,14 +60,14 @@ struct LibraryAlbumView: View {
                             Button {
                                 Task {
                                     await self.playHref(href: track.href)
-                                    //                                    await self.clearQueue()
-                                    //                                    self.playNext(from: track)
-                                    //
-                                    //                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    //                                        Task {
-                                    //                                            await self.skipTrack()
-                                    //                                        }
-                                    //                                    }
+//                                    await self.clearQueue()
+//                                    self.playNext(from: track)
+//
+//                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//                                        Task {
+//                                            await self.skipTrack()
+//                                        }
+//                                    }
                                 }
                             } label: {
                                 LibraryTrackRow(track, number: track.trackNumber, showCover: false)
@@ -113,6 +119,7 @@ struct LibraryAlbumView: View {
         .task {
             defer { self.isLoading = false }
             self.album.tracks = await self.getTracks(from: self.album)
+            self.setupPlayer()
 
             if let last = self.album.tracks?.map({ $0.discNumber }).last {
                 self.multiDisc = last > 1
@@ -126,44 +133,50 @@ struct LibraryAlbumView: View {
 
     var header: some View {
         LazyVStack {
-            AsyncImage(url: URL(string: album.artwork)) { image in
-                image
-                    .resizable()
-                    .frame(width: 220, height: 220)
-                    .clipShape(RoundedRectangle(cornerRadius: 7))
-            } placeholder: {
-                ZStack {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .zIndex(20)
-
-                    Rectangle()
-                        .fill(Color.gray)
+            if let player {
+                UninteractableVideoPlayer(player: player)
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+            } else {
+                AsyncImage(url: URL(string: album.artwork)) { image in
+                    image
+                        .resizable()
+                        .frame(width: 220, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 7))
-                        .zIndex(10)
-                }
-                .frame(width: 220, height: 220)
-            }
-            .contextMenu {
-                Button {
-                    Task {
-                        guard let url = URL(string: album.artwork),
-                              let (data, _) = try? await URLSession.shared.data(from: url),
-                              let image = UIImage(data: data) else {
-                            return
-                        }
-                        self.sharingImage = image
+                } placeholder: {
+                    ZStack {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .zIndex(20)
+
+                        Rectangle()
+                            .fill(Color.gray)
+                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                            .zIndex(10)
                     }
-                } label: {
-                    Label("Share image", systemImage: "square.and.arrow.up")
+                    .frame(width: 220, height: 220)
                 }
-            }
-            .sheet(item: Binding<UIImage?>(
-                get: { sharingImage },
-                set: { newValue in sharingImage = newValue }
-            )) { image in
-                ActivityViewController(item: .image(images: [image]))
-                    .presentationDetents([.medium, .large])
+                .contextMenu {
+                    Button {
+                        Task {
+                            guard let url = URL(string: album.artwork),
+                                  let (data, _) = try? await URLSession.shared.data(from: url),
+                                  let image = UIImage(data: data) else {
+                                return
+                            }
+                            self.sharingImage = image
+                        }
+                    } label: {
+                        Label("Share image", systemImage: "square.and.arrow.up")
+                    }
+                }
+                .sheet(item: Binding<UIImage?>(
+                    get: { sharingImage },
+                    set: { newValue in sharingImage = newValue }
+                )) { image in
+                    ActivityViewController(item: .image(images: [image]))
+                        .presentationDetents([.medium, .large])
+                }
             }
 
             Text(self.album.title)
@@ -196,6 +209,20 @@ struct LibraryAlbumView: View {
             .background(Color.cider)
             .clipShape(RoundedRectangle(cornerRadius: 10.0))
         }
+    }
+
+    private func setupPlayer() {
+        guard player == nil, let videoURL else { return }
+
+        let newPlayer = AVPlayer(url: URL(string: videoURL)!)
+        self.player = newPlayer
+
+        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: newPlayer.currentItem, queue: .main) { _ in
+            newPlayer.seek(to: .zero)
+            newPlayer.play()
+        }
+
+        newPlayer.play()
     }
 }
 
@@ -277,7 +304,7 @@ extension LibraryAlbumView {
 
     func getAlbum(using track: LibraryTrack) async {
         do {
-            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums") as? [[String: Any]] else { return }
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums?extend=editorialVideo") as? [[String: Any]] else { return }
             if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any], attributes["isPrerelease"] as? Int == 1 {
                 let dateFormat: DateFormatter = .init()
                 dateFormat.dateFormat = "YYYY-MM-dd"
