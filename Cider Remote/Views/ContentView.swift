@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var showingSettings = false
     @StateObject private var prompt: AppPrompt = .shared
 
+    @State private var updatePopup: Bool = false
+
     private var isGlass: Bool {
         if #available(iOS 26.0, *) {
             return true
@@ -47,6 +49,10 @@ struct ContentView: View {
                 if AppPrompt.shared.showingPrompt == .accesCamera {
                     CameraPromptView()
                 }
+
+                if AppPrompt.shared.showingPrompt == .update {
+                    UpdatePromptView()
+                }
             }
         }
         .sheet(isPresented: $showingSettings) {
@@ -64,9 +70,45 @@ struct ContentView: View {
                     case .oldDevice:
                         OldDeviceAlertView()
                             .presentationDetents([.medium])
+                    case .update:
+                        UpdatePromptView()
+                            .presentationDetents([.medium])
                 }
             }
         }
+        .onAppear {
+            if !UserDefaults.standard.bool(forKey: "updatePopup") {
+                AppPrompt.shared.showingPrompt = .update
+            }
+        }
+    }
+}
+
+struct UpdatePromptView: View {
+    var prompt: Prompt {
+        var p: Prompt = Prompt(
+            symbol: "arrow.down.app.dashed.trianglebadge.exclamationmark",
+            title: "Remote v4.0.0 & Cider 4",
+            view: AnyView(self.txt),
+            actionLabel: "OK",
+            action: {
+                UserDefaults.standard.set(false, forKey: "updatePopup")
+            }
+        )
+        return p.cancellable(false)
+    }
+
+    var body: some View {
+        FullPrompt(prompt) {
+            AppPrompt.shared.showingPrompt = nil
+        }
+    }
+
+    var txt: some View {
+        Text("The upcoming Cider version, Cider 4, might cause compatibility issues with Cider Remote v3.1.1 and less. Please remember to **update Cider Remote** along with Cider to have the best music-listening experience.\n\nYou will not be shown this message later.")
+            .font(.subheadline)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
     }
 }
 
