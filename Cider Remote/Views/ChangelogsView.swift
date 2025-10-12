@@ -304,6 +304,14 @@ extension Changelog {
         return temp
     }
 
+    /// Remote 3.1.1
+    static var v311: Changelog {
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa"])
+        temp = temp
+            .setChanges(additions: ["A message about Cider 4 & Remote v4.0.0 will now appear"], modifications: ["Fix: Playlists won't crash the app anymore"])
+        return temp
+    }
+
     /// Remote 3.1.0
     static var v310: Changelog {
         var temp = Changelog(version: "3.1.0", authors: ["Lumaa"], commits: "7b5dd1...main")
