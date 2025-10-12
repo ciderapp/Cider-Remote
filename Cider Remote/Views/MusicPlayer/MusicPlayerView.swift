@@ -16,6 +16,8 @@ struct MusicPlayerView: View {
 
     let device: Device
 
+    @Namespace private var artworkAnim
+
     @StateObject private var userDevice: UserDevice = .shared
 
     @State private var hasPlayed = false
@@ -35,6 +37,9 @@ struct MusicPlayerView: View {
 
     // Playback Data
     @State private var isPlaying: Bool = false
+    @State private var repeatMode: RepeatMode = .none
+    @State private var shuffleMode: ShuffleMode = .none
+    @State private var isAutoPlaying: Bool = false
     @State private var isVoluming: Bool = false
     @State private var stopTimeSlider: Bool = false
     @State private var currentTime: Double = 0
@@ -48,12 +53,13 @@ struct MusicPlayerView: View {
     @State private var backgroundColors: [Color] = []
 
     // Popups
-    @State private var showLibraryPopup = false
-    @State private var showFavoritePopup = false
+    @State private var showLibraryPopup: Bool = false
+    @State private var showFavoritePopup: Bool = false
 
     // Showing UIs
-    @State private var showingLyrics = false
-    @State private var showingQueue = false
+    @State private var showingLyrics: Bool = false
+    @State private var showingQueue: Bool = false
+    @State private var showingLibrary: Bool = false
 
     // Error
     @State private var errorMessage: String?
@@ -72,6 +78,10 @@ struct MusicPlayerView: View {
 //    @State private var lyricCache: [String: [LyricLine]] = [:]
     @State private var storefrontCache: String? = nil
 
+    private var expandedView: Bool {
+        return !self.showingQueue && !self.showingLyrics
+    }
+
     init(device: Device) {
         self.device = device
         _liveActivity = State(wrappedValue: LiveActivityManager.shared)
@@ -82,23 +92,35 @@ struct MusicPlayerView: View {
 
     var body: some View {
         VStack {
-            artwork
-                .padding(.top, self.animatedArtwork ? 0.0 : 80.0)
-                .padding(.horizontal, self.animatedArtwork ? 0.0 : 10.0)
-
-            Spacer()
-
-            trackData
+            if expandedView {
+                artwork
+                    .padding(.top, self.animatedArtwork ? 0.0 : 80.0)
+                    .padding(.horizontal, self.animatedArtwork ? 0.0 : 10.0)
+                    .matchedTransitionSource(id: "artwork", in: artworkAnim)
+            } else {
+                HStack {
+                    artwork
+                        .matchedTransitionSource(id: "artwork", in: artworkAnim)
+                }
+                .padding(.top, 80.0)
                 .padding(.horizontal, 10.0)
+            }
 
-            playbackActions
-                .padding(.horizontal, 10.0)
+            if self.showingQueue {
+                QueueView(device: device, queueItems: $queueItems, sourceQueue: $sourceQueue, currentTrack: $currentTrack) {
+                    queueActions
+                        .padding(.horizontal, 10.0)
+                }
+                .playerMask()
+                .frame(height: 450)
+//            } else if self.showingLyrics {
+                // LyricsView
+            }
 
             Spacer()
         }
         .ignoresSafeArea(.container)
         .frame(maxHeight: .infinity)
-        .environment(\.colorScheme, ColorScheme.dark)
         .background {
             ZStack {
                 Rectangle()
@@ -116,6 +138,25 @@ struct MusicPlayerView: View {
                 }
             }
         }
+        .overlay(alignment: .bottom) {
+            VStack {
+                if expandedView {
+                    trackData
+                        .padding(.horizontal, 10.0)
+                }
+
+                playbackActions
+                    .padding(.horizontal, 10.0)
+
+                navigationActions
+                    .padding(.horizontal, 30.0)
+                    .padding(.vertical, 10.0)
+            }
+            .padding(.bottom, 30.0)
+        }
+        .fullScreenCover(isPresented: $showingLibrary) {
+            BrowserView(device: device)
+        }
         .task {
             self.startListening()
 
@@ -126,6 +167,21 @@ struct MusicPlayerView: View {
                 }
             }
         }
+        .onChange(of: showingQueue) { _, newValue in
+            guard newValue else { return }
+
+            withAnimation(.easeOut.speed(1.3)) {
+                self.showingLyrics = false
+            }
+        }
+        .onChange(of: showingLyrics) { _, newValue in
+            guard newValue else { return }
+
+            withAnimation(.easeOut.speed(1.3)) {
+                self.showingQueue = false
+            }
+        }
+        .environment(\.colorScheme, ColorScheme.dark)
     }
 
     @ViewBuilder
@@ -136,8 +192,7 @@ struct MusicPlayerView: View {
                     case .empty:
                         Rectangle()
                             .fill(Color.gray.opacity(0.2))
-                            .aspectRatio(1.0, contentMode: .fit)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
                             .overlay {
                                 ProgressView()
                             }
@@ -155,9 +210,10 @@ struct MusicPlayerView: View {
                 }
             }
             .scaledToFit()
-            .frame(maxWidth: .infinity, alignment: .center)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .shadow(radius: 10)
+            .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
+            .clipShape(RoundedRectangle(cornerRadius: expandedView ? 10 : 2))
+            .aspectRatio(1.0, contentMode: .fit)
+            .shadow(radius: expandedView ? 10 : 0)
         }
     }
 
@@ -227,7 +283,7 @@ struct MusicPlayerView: View {
 
                     Spacer()
 
-                    Text(self.formatTime(self.duration - self.currentTime))
+                    Text("-" + self.formatTime(self.duration - self.currentTime))
                         .font(.caption.bold(self.stopTimeSlider))
                         .foregroundStyle(self.stopTimeSlider ? Color.white : Color.secondary)
                         .opacity(self.stopTimeSlider ? 1.0 : 0.5)
@@ -294,6 +350,111 @@ struct MusicPlayerView: View {
         }
     }
 
+    @ViewBuilder
+    private var navigationActions: some View {
+        HStack {
+            Button {
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingLyrics.toggle()
+                }
+            } label: {
+                Image(systemName: "quote.bubble")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(self.showingLyrics ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+            .padding(7.5)
+            .background(self.showingLyrics ? Color.white.opacity(0.5) : Color.clear)
+            .clipShape(Circle())
+
+            Spacer()
+
+            BrowserView.access($showingLibrary)
+
+            Spacer()
+
+            Button {
+                Task {
+                    await self.getAutoplay()
+                    await self.getRepeat()
+                }
+
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingQueue.toggle()
+                }
+            } label: {
+                Image(systemName: "list.bullet")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(self.showingQueue ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+            .padding(7.5)
+            .background(self.showingQueue ? Color.white.opacity(0.5) : Color.clear)
+            .clipShape(Circle())
+        }
+    }
+
+    @ViewBuilder
+    private var queueActions: some View {
+        GlassEffectContainer {
+            HStack {
+                Button {
+                    Task {
+                        await self.toggleAutoplay()
+                    }
+                } label: {
+                    Image(systemName: "infinity")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(.plain)
+                .buttonBorderShape(.capsule)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .glassEffect(.regular.interactive().tint(self.isAutoPlaying ? Color.accentColor : Color.clear), in: Capsule())
+
+                Button {
+                    Task {
+                        await self.cycleRepeat()
+                    }
+                } label: {
+                    Image(systemName: self.repeatMode.symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .contentTransition(.symbolEffect(.replace.magic(fallback: .downUp)))
+                }
+                .buttonStyle(.plain)
+                .buttonBorderShape(.capsule)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .glassEffect(.regular.interactive().tint(self.repeatMode != .none ? Color.accentColor : Color.clear), in: Capsule())
+
+                Button {
+                    Task {
+                        await self.cycleShuffle()
+                    }
+                } label: {
+                    Image(systemName: "shuffle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .contentTransition(.symbolEffect(.replace.magic(fallback: .downUp)))
+                }
+                .buttonStyle(.plain)
+                .buttonBorderShape(.capsule)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .glassEffect(.regular.interactive().tint(self.shuffleMode == .shuffling ? Color.accentColor : Color.clear), in: Capsule())
+            }
+        }
+    }
+
     private func formatTime(_ time: Double) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
@@ -338,8 +499,6 @@ struct MusicPlayerView: View {
                 print("Invalid playback data received")
                 return
             }
-
-            //            print("Received playback event: \(type)")
 
             DispatchQueue.main.async {
                 switch type {
@@ -810,24 +969,6 @@ struct MusicPlayerView: View {
         }
     }
 
-    func togglePlayPause() async {
-        print("Toggling play/pause")
-        withAnimation {
-            isPlaying.toggle() // Immediately update UI
-        }
-        do {
-            _ = try await sendRequest(endpoint: "playback/playpause", method: "POST")
-            // Server confirmed the change, no need to update UI again
-            if #available(iOS 18.0, *) {
-                ControlCenter.shared.reloadControls(ofKind: "sh.cider.CiderRemote.PlayPauseControl")
-            }
-        } catch {
-            // Revert the UI change if the server request failed
-            isPlaying.toggle()
-            handleError(error)
-        }
-    }
-
     func nextTrack() async {
         print("Skipping to next track")
         do {
@@ -853,6 +994,100 @@ struct MusicPlayerView: View {
         do {
             _ = try await sendRequest(endpoint: "playback/seek", method: "POST", body: ["position": currentTime])
         } catch {
+            handleError(error)
+        }
+    }
+
+    func getRepeat() async {
+        do {
+            let result = try await sendRequest(endpoint: "playback/repeat-mode", method: "GET")
+            if let data = result as? [String: Any] {
+                let val: Int = data["value"] as? Int ?? 0
+                self.repeatMode = .init(rawValue: val) ?? .none
+            }
+        } catch {
+            handleError(error)
+        }
+    }
+
+    func getShuffle() async {
+        do {
+            let result = try await sendRequest(endpoint: "playback/shuffle-mode", method: "GET")
+            if let data = result as? [String: Any] {
+                let val: Int = data["value"] as? Int ?? 0
+                self.shuffleMode = .init(rawValue: val) ?? .none
+            }
+        } catch {
+            handleError(error)
+        }
+    }
+
+    func getAutoplay() async {
+        do {
+            let result = try await sendRequest(endpoint: "playback/autoplay", method: "GET")
+            if let data = result as? [String: Any] {
+                self.isAutoPlaying = data["value"] as? Bool ?? false
+            }
+        } catch {
+            handleError(error)
+        }
+    }
+
+    func togglePlayPause() async {
+        print("Toggling play/pause")
+        withAnimation {
+            isPlaying.toggle() // Immediately update UI
+        }
+        do {
+            _ = try await sendRequest(endpoint: "playback/playpause", method: "POST")
+            // Server confirmed the change, no need to update UI again
+            if #available(iOS 18.0, *) {
+                ControlCenter.shared.reloadControls(ofKind: "sh.cider.CiderRemote.PlayPauseControl")
+            }
+        } catch {
+            // Revert the UI change if the server request failed
+            isPlaying.toggle()
+            handleError(error)
+        }
+    }
+
+    func cycleRepeat() async {
+        print("Cycling through repeat")
+        let lastRepeat: RepeatMode = self.repeatMode
+        withAnimation {
+            self.repeatMode = .init(rawValue: self.repeatMode.rawValue + 1) ?? .none
+        }
+        do {
+            _ = try await sendRequest(endpoint: "playback/toggle-repeat", method: "POST")
+        } catch {
+            self.repeatMode = lastRepeat
+            handleError(error)
+        }
+    }
+
+    func cycleShuffle() async {
+        print("Cycling through shuffle")
+        let lastShuffle: ShuffleMode = self.shuffleMode
+        withAnimation {
+            self.shuffleMode = .init(rawValue: self.shuffleMode.rawValue + 1) ?? .none
+        }
+        do {
+            _ = try await sendRequest(endpoint: "playback/toggle-shuffle", method: "POST")
+        } catch {
+            self.shuffleMode = lastShuffle
+            handleError(error)
+        }
+    }
+
+    func toggleAutoplay() async {
+        print("Toggling autoplay")
+        withAnimation {
+            self.isAutoPlaying.toggle() // Immediately update UI
+        }
+        do {
+            _ = try await sendRequest(endpoint: "playback/toggle-autoplay", method: "POST")
+        } catch {
+            isAutoPlaying.toggle()
             handleError(error)
         }
     }
@@ -1071,6 +1306,26 @@ struct MusicPlayerView: View {
         }
         print("Error: \(errorMessage ?? "Unknown error")")
     }
+
+    private enum RepeatMode: Int {
+        case none = 0
+        case queue = 2
+        case track = 1
+
+        var symbol: String {
+            switch self {
+                case .none, .queue:
+                    "repeat"
+                case .track:
+                    "repeat.1"
+            }
+        }
+    }
+
+    private enum ShuffleMode: Int {
+        case none = 0
+        case shuffling = 1
+    }
 }
 
 // MARK: - Extensions
@@ -1127,6 +1382,20 @@ fileprivate struct MoreActionsMenu: View {
             ActivityViewController(item: .track(track: currentTrack))
                 .presentationDetents([.medium, .large])
         }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func playerMask() -> some View {
+        self
+            .mask(alignment: .center) {
+                LinearGradient(
+                    colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.9), Color.white.opacity(0.8), Color.white.opacity(0.75), Color.white.opacity(0.65), Color.clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
     }
 }
 
