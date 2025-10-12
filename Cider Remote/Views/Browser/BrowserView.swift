@@ -153,7 +153,6 @@ struct BrowserView: View {
                         .lineLimit(1)
                 }
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .glassEffect(.regular.interactive())
             } else {
                 HStack(alignment: .center, spacing: 14) {
                     Image(systemName: "play.square.stack.fill")
@@ -181,6 +180,7 @@ struct BrowserView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
+        .buttonStyle(.glass)
     }
 }
 
