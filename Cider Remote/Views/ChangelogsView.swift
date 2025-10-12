@@ -6,7 +6,7 @@ struct ChangelogsView: View {
     @Environment(\.colorScheme) private var colorScheme: ColorScheme
     @Environment(\.openURL) private var openURL: OpenURLAction
 
-    private static let changelogs: [Changelog] = [.v310, .v303, .v302, .v301, .v300]
+    private static let changelogs: [Changelog] = [.v400, .v310, .v303, .v302, .v301, .v300]
 
     @State private var selectedChangelog: Changelog? = nil
 
