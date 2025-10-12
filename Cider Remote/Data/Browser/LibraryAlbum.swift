@@ -19,15 +19,19 @@ struct LibraryAlbum: Identifiable, Hashable {
 
     init(data: [String: Any]) {
         let attributes: [String: Any] = data["attributes"] as! [String: Any]
-        let artwork: [String: Any] = attributes["artwork"] as! [String: Any]
 
         self.id = data["id"] as! String
         self.title = attributes["name"] as! String
         self.artist = attributes["artistName"] as! String
-        if let w = artwork["width"] as? Int {
-            self.artwork = (artwork["url"] as! String).replacing(/\{(w|h)\}/, with: "\(w)")
+
+        if let artwork: [String: Any] = attributes["artwork"] as? [String: Any] {
+            if let w = artwork["width"] as? Int {
+                self.artwork = (artwork["url"] as! String).replacing(/\{(w|h)\}/, with: "\(w)")
+            } else {
+                self.artwork = (artwork["url"] as! String).replacing(/\{(w|h)\}/, with: "\(700)")
+            }
         } else {
-            self.artwork = (artwork["url"] as! String).replacing(/\{(w|h)\}/, with: "\(700)")
+            self.artwork = "[NONE]"
         }
     }
 }
