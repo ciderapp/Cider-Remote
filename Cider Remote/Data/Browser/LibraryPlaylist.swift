@@ -20,7 +20,7 @@ struct LibraryPlaylist: Identifiable, Hashable {
         let attributes: [String: Any] = data["attributes"] as! [String: Any]
         let playParams: [String: Any] = attributes["playParams"] as! [String: Any]
 
-        self.id = playParams["id"] as! String
+        self.id = playParams["id"] as? String ?? data["id"] as! String // use all IDs known to fucking AM
         self.name = attributes["name"] as! String
 
         if let artwork: [String: Any] = attributes["artwork"] as? [String: Any] {
