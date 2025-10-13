@@ -31,6 +31,7 @@ struct ContentView: View {
                                 self.showingSettings.toggle()
                             } label: {
                                 Image(systemName: "gear")
+                                    .foregroundStyle(Color.primary)
                             }
                         }
                     }
