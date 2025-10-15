@@ -31,12 +31,10 @@ struct ContentView: View {
                                 self.showingSettings.toggle()
                             } label: {
                                 Image(systemName: "gear")
-                                    .foregroundStyle(Color.primary)
                             }
                         }
                     }
             }
-            .tint(Color.cider)
 
             if !isGlass {
                 if AppPrompt.shared.showingPrompt == .newDevice {
@@ -282,8 +280,8 @@ struct StatusIndicator: View {
 }
 
 struct ConnectionGuideView: View {
-    @Environment(\.presentationMode) var presentationMode
-    
+    @Environment(\.dismiss) var dismiss: DismissAction
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -339,11 +337,17 @@ struct ConnectionGuideView: View {
                 }
                 .padding()
             }
-            .navigationBarTitle("Connection Guide")
+            .navigationTitle("Connection Guide")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
         }
     }
 }
