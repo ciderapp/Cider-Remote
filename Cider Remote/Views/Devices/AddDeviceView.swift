@@ -33,6 +33,7 @@ struct AddDeviceView: View {
             }
         } label: {
             Label("Add New Cider Device", systemImage: "plus.circle")
+                .foregroundStyle(Color.cider)
         }
         .sheet(isPresented: $isShowingScanner) {
 #if targetEnvironment(simulator)
