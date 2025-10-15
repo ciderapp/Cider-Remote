@@ -16,20 +16,15 @@ struct MusicPlayerView: View {
 
     let device: Device
 
-    @Namespace private var artworkAnim
-
     @StateObject private var userDevice: UserDevice = .shared
 
-    @State private var hasPlayed = false
-    @State private var librarySheet = false
-
     @State private var isLoading = true
-    @State private var isCompact = false
 
     // Live Activity
     @State private var liveActivity: LiveActivityManager = LiveActivityManager.shared
 
     // Queue & Playing
+    @State private var hasPlayed = false
     @State private var queueItems: [Track] = []
     @State private var sourceQueue: Queue?
     @State private var currentTrack: Track?
@@ -82,6 +77,8 @@ struct MusicPlayerView: View {
         return !self.showingQueue && !self.showingLyrics
     }
 
+    private static let horizontalPadding: CGFloat = 20.0
+
     init(device: Device) {
         self.device = device
         _liveActivity = State(wrappedValue: LiveActivityManager.shared)
@@ -95,26 +92,24 @@ struct MusicPlayerView: View {
             if expandedView {
                 artwork
                     .padding(.top, self.animatedArtwork ? 0.0 : 80.0)
-                    .padding(.horizontal, self.animatedArtwork ? 0.0 : 10.0)
-                    .matchedTransitionSource(id: "artwork", in: artworkAnim)
+                    .padding(.horizontal, self.animatedArtwork ? 0.0 : Self.horizontalPadding)
             } else {
                 HStack {
                     artwork
-                        .matchedTransitionSource(id: "artwork", in: artworkAnim)
                 }
                 .padding(.top, 80.0)
-                .padding(.horizontal, 10.0)
+                .padding(.horizontal, Self.horizontalPadding + 15.0)
             }
 
             if self.showingQueue {
                 QueueView(device: device, queueItems: $queueItems, sourceQueue: $sourceQueue, currentTrack: $currentTrack) {
                     queueActions
-                        .padding(.horizontal, 10.0)
+                        .padding(.horizontal, Self.horizontalPadding)
                 }
-                .playerMask()
-                .frame(height: 450)
-//            } else if self.showingLyrics {
-                // LyricsView
+                .minimalView()
+            } else if self.showingLyrics {
+                LyricsView(device: device, currentTrack: $currentTrack, currentTime: $currentTime)
+                    .frame(height: 600)
             }
 
             Spacer()
@@ -142,11 +137,18 @@ struct MusicPlayerView: View {
             VStack {
                 if expandedView {
                     trackData
-                        .padding(.horizontal, 10.0)
+                        .padding(.horizontal, Self.horizontalPadding)
                 }
 
-                playbackActions
-                    .padding(.horizontal, 10.0)
+                if !self.showingLyrics {
+                    playbackActions
+                        .padding(.horizontal, Self.horizontalPadding)
+                        .transition(
+                            .move(edge: .bottom)
+                            .combined(with: .opacity)
+                            .animation(.spring(duration: 0.4))
+                        )
+                }
 
                 navigationActions
                     .padding(.horizontal, 30.0)
@@ -234,8 +236,6 @@ struct MusicPlayerView: View {
                             .opacity(0.5)
                             .lineLimit(1)
                     }
-                    .padding(10.0)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 15.0))
 
                     Button {
                         Task {
@@ -603,117 +603,6 @@ struct MusicPlayerView: View {
             handleError(error)
         }
     }
-
-//    func fetchAllLyrics() async {
-//        let success: Bool = await self.fetchLyricsAm() // apple music
-//        if !success {
-//            _ = await self.fetchLyricsMxm() // musixmatch
-//        }
-//    }
-
-    /// Returns true if the lyrics were found and fetched
-//    func fetchLyricsMxm() async -> Bool {
-//        guard let currentTrack else { return false }
-//
-//        print("Current track ID: \(currentTrack.id)")
-//
-//        if let cachedLyrics = lyricCache[currentTrack.id] {
-//            print("Using cached lyrics for track: \(currentTrack.id)")
-//            self.lyricsProvider = .cache
-//            self.lyrics = cachedLyrics
-//            return true
-//        }
-//
-//        self.lyrics = nil
-//        guard let lyricsUrl = URL(string: "https://rise.cider.sh/api/v1/lyrics/mxm") else { return false }
-//
-//        do {
-//            print("Fetching lyrics ONLINE for track: \(currentTrack.id)")
-//
-//            let lyricReq: Track.RequestLyrics = .init(track: currentTrack)
-//            let encoder: JSONEncoder = .init()
-//            let body: Data = try encoder.encode(lyricReq)
-//
-//            var req = URLRequest(url: lyricsUrl, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: .infinity)
-//            req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//            req.httpMethod = "POST"
-//            req.httpBody = body
-//
-//            let (data, response) = try await URLSession.shared.data(for: req)
-//
-//            if let http = response as? HTTPURLResponse, http.statusCode == 200 {
-//                let decoder: JSONDecoder = .init()
-//                print(String(data: data, encoding: .utf8) ?? "wtf?")
-//                let mxm = try decoder.decode(Track.MxmLyrics.self, from: data)
-//
-//                let lines = mxm.decodeHtml()
-//                print("Parsed \(lines.count) lyric lines")
-//                if lines.count > 0 {
-//                    DispatchQueue.main.async {
-//                        self.lyricsProvider = .mxm
-//                        self.lyrics = lines
-//                        self.lyricCache[currentTrack.id] = self.lyrics
-//                    }
-//                    return true
-//                }
-//            } else {
-//                self.lyrics = []
-//                throw NetworkError.serverError("Couldn't reach server")
-//            }
-//        } catch {
-//            self.lyrics = []
-//            print(error)
-//            handleError(error)
-//        }
-//        return false
-//    }
-
-    /// Returns true if the lyrics were found and fetched
-//    func fetchLyricsAm() async -> Bool {
-//        guard let currentTrack else { return false }
-//
-//        print("Current track ID: \(currentTrack.id)")
-//
-//        if let cachedLyrics = lyricCache[currentTrack.id] {
-//            print("Using cached lyrics for track: \(currentTrack.id)")
-//            self.lyricsProvider = .cache
-//            self.lyrics = cachedLyrics
-//            return true
-//        }
-//
-//        do {
-//            guard let storefront = await self.getStorefront() else { return false }
-//
-//            print("Fetching lyrics FROM CLIENT for track: \(currentTrack.id)")
-//            let path: String = "/v1/catalog/\(storefront)/songs/\(currentTrack.catalogId)/lyrics?l=en-US&platform=web&art[url]=f"
-//            let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": path])
-//
-//            print(data)
-//            if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any], let subdata = data["data"] as? [[String: Any]], let lyricsData = subdata[0]["attributes"] as? [String: Any] {
-//                guard let lyricsXml = lyricsData["ttml"] as? String, let data = lyricsXml.data(using: .utf8) else {
-//                    print("-- After fetch decoding error --")
-//                    throw NetworkError.decodingError
-//                }
-//
-//                let xmlParser = XMLParser(data: data)
-//                let ttmlParser = Parser(provider: .am)
-//                xmlParser.delegate = ttmlParser
-//                xmlParser.parse()
-//
-//                self.lyricsProvider = .am
-//                self.lyrics = ttmlParser.lyrics
-//                self.lyricCache[currentTrack.id] = self.lyrics
-//                return true
-//            } else {
-//                throw NetworkError.invalidResponse
-//            }
-//        } catch {
-//            print("Error fetching lyrics: \(error)")
-//            handleError(error)
-//        }
-//        return false
-//    }
 
     func getStorefront() async -> String? {
         do {
@@ -1387,7 +1276,7 @@ fileprivate struct MoreActionsMenu: View {
 
 private extension View {
     @ViewBuilder
-    func playerMask() -> some View {
+    func minimalView(height: CGFloat? = 450) -> some View {
         self
             .mask(alignment: .center) {
                 LinearGradient(
@@ -1396,6 +1285,7 @@ private extension View {
                     endPoint: .bottom
                 )
             }
+            .frame(height: height)
     }
 }
 

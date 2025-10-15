@@ -145,14 +145,14 @@ struct Track: Codable, Equatable {
             self.cached = try container.decodeIfPresent(Bool.self, forKey: Track.MxmLyrics.CodingKeys.cached)
         }
 
-//        func decodeHtml() -> [LyricLine] {
-//            guard let data = self.body.data(using: .utf8) else { return [] }
-//            let xmlParser = XMLParser(data: data)
-//            let ttmlParser = Parser(provider: .mxm)
-//            xmlParser.delegate = ttmlParser
-//            xmlParser.parse()
-//            return ttmlParser.lyrics
-//        }
+        func decodeHtml() -> [LyricLine] {
+            guard let data = self.body.data(using: .utf8) else { return [] }
+            let xmlParser = XMLParser(data: data)
+            let ttmlParser = Parser(provider: .mxm)
+            xmlParser.delegate = ttmlParser
+            xmlParser.parse()
+            return ttmlParser.lyrics
+        }
 
         private func decodeHtml() -> [(start: Double, end: Double, line: String)]? {
             guard let p = self.body.matches(of: /<p .+<\/p>/).first else { return nil }
