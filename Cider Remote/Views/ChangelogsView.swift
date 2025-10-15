@@ -289,12 +289,14 @@ extension Changelog {
                 "Cider Collective team in the contributors screen",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
                 "Slowly moving color gradient in the background",
-                "Left-to-right and right-to-left lyrics"
+                "Left-to-right and right-to-left lyrics",
+                "New \"Cider Remote\" title integrated in the screen's top bar",
             ], modifications: [
                 "Temporary?: iOS 26+ only",
+                "The \"Cider Devices\" title has been replaced with \"Cider Remote\"",
                 "\"Library Browser\" button is always displayed now",
                 "A more Apple Music-like user interface when remote-ing",
-                "Unified design in the changelogs screen",
+                "Unified design in the changelogs screen and connection guide screen",
                 "More Liquid Glass",
                 "Contributors screen moved in the copyright section",
                 "Smaller \"Library Browser\" button to fit its new location",
