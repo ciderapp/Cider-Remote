@@ -287,15 +287,20 @@ extension Changelog {
         temp = temp
             .setChanges(additions: [
                 "Cider Collective team in the contributors screen",
-                "Shuffle, repeat and autoplay buttons at the top of the queue",
+                "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
+                "Slowly moving color gradient in the background",
+                "Left-to-right and right-to-left lyrics"
             ], modifications: [
                 "Temporary?: iOS 26+ only",
+                "\"Library Browser\" button is always displayed now",
                 "A more Apple Music-like user interface when remote-ing",
-                "More Liquid Glass",
                 "Unified design in the changelogs screen",
+                "More Liquid Glass",
                 "Contributors screen moved in the copyright section",
+                "Smaller \"Library Browser\" button to fit its new location",
                 "The message about Cider 4 & Remote v4.0.0 will now re-appear with new text"
             ], removals: [
+                "Background with blurred song cover",
                 "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
                 "View Models (not all of them just yet...)"
             ])
