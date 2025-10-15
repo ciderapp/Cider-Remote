@@ -78,7 +78,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if !UserDefaults.standard.bool(forKey: "updatePopup") {
+            UserDefaults.standard.removeObject(forKey: "updatePopup")
+
+            if !UserDefaults.standard.bool(forKey: "updatePopup_v4") {
                 AppPrompt.shared.showingPrompt = .update
             }
         }
@@ -88,12 +90,12 @@ struct ContentView: View {
 struct UpdatePromptView: View {
     var prompt: Prompt {
         var p: Prompt = Prompt(
-            symbol: "arrow.down.app.dashed.trianglebadge.exclamationmark",
-            title: "Remote v4.0.0 & Cider 4",
+            symbol: "wand.and.sparkles.inverse",
+            title: "Remote v4.0.0",
             view: AnyView(self.txt),
             actionLabel: "OK",
             action: {
-                UserDefaults.standard.set(false, forKey: "updatePopup")
+                UserDefaults.standard.set(false, forKey: "updatePopup_v4")
             }
         )
         return p.cancellable(false)
@@ -106,9 +108,9 @@ struct UpdatePromptView: View {
     }
 
     var txt: some View {
-        Text("The upcoming Cider version, Cider 4, might cause compatibility issues with Cider Remote v3.1.1 and less. Please remember to **update Cider Remote** along with Cider to have the best music-listening experience.\n\nYou will not be shown this message later.")
+        Text("Welcome to Remote's biggest update, Remote v4.0.0. It features a complete redesign of the remote, duo lyrics, and the long-waited \"Shuffle\", \"Repeat\" and \"Autoplay\" buttons!")
             .font(.subheadline)
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(.leading)
             .padding(.horizontal)
     }
 }
