@@ -20,8 +20,6 @@ struct DevicesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-
             List {
                 ForEach(devices) { device in
                     NavigationLink(value: device) {
@@ -39,12 +37,15 @@ struct DevicesView: View {
                 AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { json in
                     self.fetchDevices(from: json)
                 }
+                .tint(Color.cider)
 
-                Button(action: {
+                Button {
                     isShowingGuide = true
-                }) {
+                } label: {
                     Label("Connection Guide", systemImage: "questionmark.circle")
+                        .foregroundStyle(Color.cider)
                 }
+                .tint(Color.cider)
             }
             .listStyle(InsetGroupedListStyle())
             .task {
@@ -53,15 +54,16 @@ struct DevicesView: View {
             .refreshable {
                 await self.refreshDevices()
             }
-#if DEBUG
-            Label("This is a DEBUG version.", systemImage: "gearshape.2.fill")
-                .foregroundStyle(.orange)
-                .accessibility(label: Text("Debug software"))
-#endif
+        }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                header
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Device.self) { device in
             LazyView(MusicPlayerView(device: device))
+                .tint(Color.cider)
         }
         .sheet(isPresented: $isShowingGuide) {
             ConnectionGuideView()
@@ -81,13 +83,11 @@ struct DevicesView: View {
                 .scaledToFit()
                 .frame(height: 40)
 
-            Text("Cider Devices")
+            Text("Remote")
                 .font(.title2)
                 .fontWeight(.bold)
         }
-        .padding()
         .frame(maxWidth: .infinity)
-        .background(Material.ultraThick)
     }
 
     @MainActor
