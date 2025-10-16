@@ -304,7 +304,7 @@ extension Changelog {
             ], removals: [
                 "Background with blurred song cover",
                 "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
-                "View Models (not all of them just yet...)"
+                "View Models"
             ])
         temp = temp.setNotes(headerNote: "Remote v4.0.0 is full redesign of the remote app and goes along with Cider 4's new logistic")
         return temp
