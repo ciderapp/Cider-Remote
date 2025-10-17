@@ -171,17 +171,33 @@ struct MusicPlayerView: View {
             }
         }
         .onChange(of: showingQueue) { _, newValue in
-            guard newValue else { return }
+            if let player {
+                if newValue {
+                    player.pause()
+                } else {
+                    player.play()
+                }
+            }
 
-            withAnimation(.easeOut.speed(1.3)) {
-                self.showingLyrics = false
+            if newValue {
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingLyrics = false
+                }
             }
         }
         .onChange(of: showingLyrics) { _, newValue in
-            guard newValue else { return }
+            if let player {
+                if newValue {
+                    player.pause()
+                } else {
+                    player.play()
+                }
+            }
 
-            withAnimation(.easeOut.speed(1.3)) {
-                self.showingQueue = false
+            if newValue {
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingQueue = false
+                }
             }
         }
         .environment(\.colorScheme, ColorScheme.dark)
@@ -192,8 +208,15 @@ struct MusicPlayerView: View {
         if let track = self.currentTrack {
             if videoArtwork != nil && expandedView, let player {
                 UninteractableVideoPlayer(player: player)
-                    .aspectRatio(LibraryAlbum.AnimatedCover.square.ratio, contentMode: .fit)
+                    .aspectRatio(LibraryAlbum.AnimatedCover.tall.ratio, contentMode: .fit)
                     .frame(maxWidth: .infinity)
+                    .mask(alignment: .center) {
+                        LinearGradient(
+                            colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.75), Color.white.opacity(0.65), Color.white.opacity(0.5), Color.white.opacity(0.4), Color.clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
             } else {
                 AsyncImage(url: URL(string: track.artwork)) { phase in
                     switch phase {
@@ -741,7 +764,7 @@ struct MusicPlayerView: View {
                 Task {
                     await self.updateQueue(newTrack: newTrack)
 
-                    self.videoArtwork = await self.getAnimatedCover(size: .square)
+                    self.videoArtwork = await self.getAnimatedCover(size: .tall)
                     if self.videoArtwork != nil {
                         self.setupAVPlayer()
                     }

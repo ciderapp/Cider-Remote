@@ -111,7 +111,7 @@ struct LibraryAlbumView: View {
                     }
                     Divider()
                 }
-                .padding(.top)
+                .padding(.top, videoURL != nil ? 0 : 15.0)
             }
         }
         .padding(.top, videoURL != nil ? -120 : 0)
