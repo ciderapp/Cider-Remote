@@ -14,7 +14,7 @@ struct LibraryAlbumView: View {
     @State private var releaseDate: Date? = nil
 
     @State private var player: AVPlayer? = nil
-    @State private var videoURL: String? = nil
+    @State private var videoURL: URL? = nil
 
     @State private var sharingTrack: LibraryTrack? = nil
     @State private var sharingImage: UIImage? = nil
@@ -114,10 +114,12 @@ struct LibraryAlbumView: View {
                 .padding(.top)
             }
         }
+        .padding(.top, videoURL != nil ? -120 : 0)
         .navigationTitle(Text(album.title))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             defer { self.isLoading = false }
+            self.videoURL = await self.album.getAnimatedCover(using: device, size: .tall)
             self.album.tracks = await self.getTracks(from: self.album)
             self.setupPlayer()
 
@@ -135,8 +137,25 @@ struct LibraryAlbumView: View {
         LazyVStack {
             if let player {
                 UninteractableVideoPlayer(player: player)
-                    .aspectRatio(1, contentMode: .fit)
+                    .aspectRatio(LibraryAlbum.AnimatedCover.tall.ratio, contentMode: .fit)
                     .frame(maxWidth: .infinity)
+                    .overlay(alignment: .bottom) {
+                        VStack {
+                            Text(self.album.title)
+                                .font(.body.bold())
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+
+                            Text(self.album.artist)
+                                .font(.body)
+                                .lineLimit(1)
+                                .foregroundStyle(Color.secondary)
+                        }
+                        .padding(10.0)
+                        .frame(width: 250, alignment: .center)
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 15.0))
+                        .padding(.vertical, 25.0)
+                    }
             } else {
                 AsyncImage(url: URL(string: album.artwork)) { image in
                     image
@@ -177,19 +196,19 @@ struct LibraryAlbumView: View {
                     ActivityViewController(item: .image(images: [image]))
                         .presentationDetents([.medium, .large])
                 }
+
+                Text(self.album.title)
+                    .font(.body.bold())
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+
+                Text(self.album.artist)
+                    .font(.body)
+                    .lineLimit(1)
+                    .foregroundStyle(Color.secondary)
             }
-
-            Text(self.album.title)
-                .font(.body.bold())
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-
-            Text(self.album.artist)
-                .font(.body)
-                .lineLimit(1)
-                .foregroundStyle(Color.secondary)
         }
-        .padding(.horizontal, 5.0)
+        .padding(.horizontal, self.videoURL == nil ? 5.0 : 0.0)
     }
 
     @ViewBuilder
@@ -214,10 +233,10 @@ struct LibraryAlbumView: View {
     private func setupPlayer() {
         guard player == nil, let videoURL else { return }
 
-        let newPlayer = AVPlayer(url: URL(string: videoURL)!)
+        let newPlayer = AVPlayer(url: videoURL)
         self.player = newPlayer
 
-        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: newPlayer.currentItem, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: newPlayer.currentItem, queue: .main) { _ in
             newPlayer.seek(to: .zero)
             newPlayer.play()
         }
@@ -304,7 +323,8 @@ extension LibraryAlbumView {
 
     func getAlbum(using track: LibraryTrack) async {
         do {
-            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums?extend=editorialVideo") as? [[String: Any]] else { return }
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums") as? [[String: Any]] else { return }
+
             if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any], attributes["isPrerelease"] as? Int == 1 {
                 let dateFormat: DateFormatter = .init()
                 dateFormat.dateFormat = "YYYY-MM-dd"

@@ -34,4 +34,41 @@ struct LibraryAlbum: Identifiable, Hashable {
             self.artwork = "[NONE]"
         }
     }
+
+    func getAnimatedCover(using device: Device, size: Self.AnimatedCover = .square) async -> URL? {
+        do {
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/albums/\(self.id)/catalog?extend=editorialVideo,extendedAssetUrls") as? [[String: Any]] else {
+                return nil
+            }
+            
+            if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any], let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any] {
+                if let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
+                    return URL(string: squareStr)
+                }
+            }
+
+            return nil
+        } catch {
+            print("Error getting album details: \(error)")
+            return nil
+        }
+    }
+
+    enum AnimatedCover: String {
+        case square = "motionDetailSquare"
+        case tall = "motionDetailTall"
+
+        var px: CGSize {
+            switch self {
+                case .square:
+                    return .init(width: 3840, height: 3840)
+                case .tall:
+                    return .init(width: 2048, height: 2732)
+            }
+        }
+
+        var ratio: CGFloat {
+            return self.px.width / self.px.height
+        }
+    }
 }
