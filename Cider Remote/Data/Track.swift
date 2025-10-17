@@ -14,7 +14,6 @@ struct Track: Codable, Equatable {
     var artworkData: Data
     var songHref: String? = nil
 
-
     init(
         id: String,
         catalogId: String,
