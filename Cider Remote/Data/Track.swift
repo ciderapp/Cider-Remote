@@ -22,7 +22,7 @@ struct Track: Codable, Equatable {
         album: String,
         artwork: String,
         duration: Double,
-        artworkData: Data,
+        artworkData: Data = Data(),
         songHref: String? = nil
     ) {
         self.id = id

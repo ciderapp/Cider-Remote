@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
-import UIKit
-import WidgetKit
-import SocketIO
 import Combine
+import SocketIO
+import WidgetKit
+import AVKit
 
 struct MusicPlayerView: View {
     @Environment(\.colorScheme) private var systemColorScheme
@@ -19,6 +19,7 @@ struct MusicPlayerView: View {
     @StateObject private var userDevice: UserDevice = .shared
 
     @State private var isLoading = true
+    @State private var player: AVPlayer? = nil
 
     // Live Activity
     @State private var liveActivity: LiveActivityManager = LiveActivityManager.shared
@@ -44,7 +45,7 @@ struct MusicPlayerView: View {
     // AM data
     @State private var isLiked: Bool = false
     @State private var isInLibrary: Bool = false
-    @State private var animatedArtwork: Bool = false
+    @State private var videoArtwork: URL? = nil
     @State private var backgroundColors: [Color] = []
 
     // Popups
@@ -91,8 +92,8 @@ struct MusicPlayerView: View {
         VStack {
             if expandedView {
                 artwork
-                    .padding(.top, self.animatedArtwork ? 0.0 : 80.0)
-                    .padding(.horizontal, self.animatedArtwork ? 0.0 : Self.horizontalPadding)
+                    .padding(.top, self.videoArtwork != nil ? 0.0 : 80.0)
+                    .padding(.horizontal, self.videoArtwork != nil ? 0.0 : Self.horizontalPadding)
             } else {
                 HStack {
                     artwork
@@ -189,33 +190,39 @@ struct MusicPlayerView: View {
     @ViewBuilder
     private var artwork: some View {
         if let track = self.currentTrack {
-            AsyncImage(url: URL(string: track.artwork)) { phase in
-                switch phase {
-                    case .empty:
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
-                            .overlay {
-                                ProgressView()
-                            }
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    case .failure:
-                        Image(systemName: "music.note")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(.gray)
-                    @unknown default:
-                        EmptyView()
+            if videoArtwork != nil && expandedView, let player {
+                UninteractableVideoPlayer(player: player)
+                    .aspectRatio(LibraryAlbum.AnimatedCover.square.ratio, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+            } else {
+                AsyncImage(url: URL(string: track.artwork)) { phase in
+                    switch phase {
+                        case .empty:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
+                                .overlay {
+                                    ProgressView()
+                                }
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        case .failure:
+                            Image(systemName: "music.note")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundStyle(.gray)
+                        @unknown default:
+                            EmptyView()
+                    }
                 }
+                .scaledToFit()
+                .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
+                .clipShape(RoundedRectangle(cornerRadius: expandedView ? 10 : 2))
+                .aspectRatio(1.0, contentMode: .fit)
+                .shadow(radius: expandedView ? 10 : 0)
             }
-            .scaledToFit()
-            .frame(maxWidth: expandedView ? .infinity : 40, maxHeight: expandedView ? nil : 40, alignment: .center)
-            .clipShape(RoundedRectangle(cornerRadius: expandedView ? 10 : 2))
-            .aspectRatio(1.0, contentMode: .fit)
-            .shadow(radius: expandedView ? 10 : 0)
         }
     }
 
@@ -461,6 +468,20 @@ struct MusicPlayerView: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    private func setupAVPlayer() {
+        guard player == nil, let videoArtwork else { return }
+
+        let newPlayer = AVPlayer(url: videoArtwork)
+        self.player = newPlayer
+
+        NotificationCenter.default.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: newPlayer.currentItem, queue: .main) { _ in
+            newPlayer.seek(to: CMTime.zero)
+            newPlayer.play()
+        }
+
+        newPlayer.play()
+    }
+
     // MARK: - Model
 
     func startListening() {
@@ -589,6 +610,28 @@ struct MusicPlayerView: View {
         }
     }
 
+    func getAnimatedCover(size: LibraryAlbum.AnimatedCover = .tall) async -> URL? {
+        guard let currentTrack else { return nil }
+        do {
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(currentTrack.catalogId)?include=albums&extend[albums]=editorialVideo") as? [[String: Any]] else { return nil }
+
+            print(data)
+
+            if let relation: [String: Any] = data[0]["relationships"] as? [String: Any], let album: [String: Any] = relation["albums"] as? [String: Any], let subdata: [[String: Any]] = album["data"] as? [[String: Any]] {
+                guard let attributes = subdata[0]["attributes"] as? [String: Any], let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any] else { return nil }
+
+                if let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
+                    return URL(string: squareStr)
+                }
+            }
+
+            return nil
+        } catch {
+            handleError(error)
+            return nil
+        }
+    }
+
     func getCurrentTrack() async {
         print("Fetching current track")
         do {
@@ -606,9 +649,9 @@ struct MusicPlayerView: View {
 
     func getStorefront() async -> String? {
         do {
-            let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": "/v1/me/storefront?limit=1"])
-            print(data)
-            if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any], let subdata = data["data"] as? [[String: Any]], let storefrontId = subdata[0]["id"] as? String {
+            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]] else { return nil }
+
+            if let storefrontId: String = data[0]["id"] as? String {
                 self.storefrontCache = storefrontId
                 return storefrontId
             }
@@ -688,31 +731,20 @@ struct MusicPlayerView: View {
             artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
             artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
 
-            let data: Data? = nil
-
-            //            Task {
-            //                let image = await self.loadImage(for: URL(string: artworkUrl)!)
-            //                if let imgData = image?.pngData() {
-            //                    data = imgData
-            //                }
-            //            }
-
-            let newTrack = Track(id: id ?? "",
-                                 catalogId: amId ?? "",
-                                 title: title,
-                                 artist: artist,
-                                 album: album,
-                                 artwork: artworkUrl,
-                                 duration: duration / 1000,
-                                 artworkData: data ?? Data()
-            )
+            let newTrack: Track = Track(id: id ?? "", catalogId: amId ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
 
             if self.currentTrack != newTrack {
                 self.currentTrack = newTrack
-//                self.lyrics = [] // Clear lyrics when track changes
+                self.videoArtwork = nil
+                self.player = nil
+
                 Task {
                     await self.updateQueue(newTrack: newTrack)
-//                    await self.fetchAllLyrics()
+
+                    self.videoArtwork = await self.getAnimatedCover(size: .square)
+                    if self.videoArtwork != nil {
+                        self.setupAVPlayer()
+                    }
                 }
             }
         }
@@ -732,7 +764,6 @@ struct MusicPlayerView: View {
         print("Updated currentTrack: \(String(describing: self.currentTrack))")
         print("isPlaying: \(self.isPlaying)")
     }
-
 
     private func handleColors() async {
         var colors: [Color] = [Color.accentColor.opacity(0.2)]

@@ -92,10 +92,12 @@ class Device: Identifiable, Codable, ObservableObject, Hashable {
 }
 
 extension Device {
-    func runAppleMusicAPI(path: String) async throws -> Any {
+    func runAppleMusicAPI(path: String, returnContent: Bool = true) async throws -> Any {
         do {
             let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": path])
             if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any] {
+                guard returnContent else { return jsonDict }
+
                 if let subdata = data["data"] as? [String: Any] { // object
                     return subdata
                 } else if let subdata = data["data"] as? [[String: Any]] { // array of objects
