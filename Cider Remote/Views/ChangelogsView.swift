@@ -283,10 +283,11 @@ struct Changelog: Hashable, Identifiable {
 extension Changelog {
     /// Remote 4.0.0
     static var v400: Changelog {
-        var temp = Changelog(version: "4.0.0", authors: ["Lumaa"])
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa"], commits: "main...v4")
         temp = temp
             .setChanges(additions: [
                 "Cider Collective team in the contributors screen",
+                "Animated album covers",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
                 "Slowly moving color gradient in the background",
                 "Left-to-right and right-to-left lyrics",
