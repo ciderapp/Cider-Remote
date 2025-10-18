@@ -24,11 +24,11 @@ struct DeviceRowView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(device.friendlyName)
-                    .font(.headline)
+                    .font(.title2.bold())
                     .lineLimit(1)
                 if deviceDetails {
                     Text("\(device.version) | \(device.platform)")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     Text("Host: \(device.host)")

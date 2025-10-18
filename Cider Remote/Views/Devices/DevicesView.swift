@@ -5,12 +5,10 @@ import SwiftUI
 struct DevicesView: View {
     @Environment(\.dismiss) private var dismiss: DismissAction
 
-    private var devices: [Device] {
-        DeviceManager.shared.devices
-    }
-    @State var isRefreshing: Bool = false
-
     @AppStorage("refreshInterval") private var refreshInterval: Double = 10.0
+
+    @State private var isRefreshing: Bool = false
+    @State private var viewingDevice: Device? = nil
 
     @State private var scannedCode: String?
     @State private var isShowingScanner = false
@@ -18,13 +16,22 @@ struct DevicesView: View {
 
     @State private var activityCheckTimer: Timer? = nil
 
+    private var devices: [Device] {
+        DeviceManager.shared.devices
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             List {
                 ForEach(devices) { device in
-                    NavigationLink(value: device) {
+                    Button {
+                        guard device.isActive else { return }
+
+                        self.viewingDevice = device
+                    } label: {
                         DeviceRowView(device: device)
                     }
+                    .tint(Color.primary)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             DeviceManager.shared.remove(device)
@@ -33,21 +40,8 @@ struct DevicesView: View {
                         }
                     }
                 }
-
-                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { json in
-                    self.fetchDevices(from: json)
-                }
-                .tint(Color.cider)
-
-                Button {
-                    isShowingGuide = true
-                } label: {
-                    Label("Connection Guide", systemImage: "questionmark.circle")
-                        .foregroundStyle(Color.cider)
-                }
-                .tint(Color.cider)
             }
-            .listStyle(InsetGroupedListStyle())
+            .listStyle(.insetGrouped)
             .task {
                 await self.refreshDevices()
             }
@@ -59,10 +53,29 @@ struct DevicesView: View {
             ToolbarItem(placement: .principal) {
                 header
             }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isShowingGuide = true
+                } label: {
+                    Label("Connection Guide", systemImage: "questionmark.circle")
+                        .foregroundStyle(Color.cider)
+                }
+            }
+
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+
+            ToolbarItem(placement: .topBarTrailing) {
+                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { json in
+                    self.fetchDevices(from: json)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(Color.cider)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: Device.self) { device in
-            LazyView(MusicPlayerView(device: device))
+        .navigationDestination(item: $viewingDevice) { device in
+            MusicPlayerView(device: device)
                 .tint(Color.cider)
         }
         .sheet(isPresented: $isShowingGuide) {
