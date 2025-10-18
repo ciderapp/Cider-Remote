@@ -275,26 +275,26 @@ struct ConnectionGuideView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Prerequisites:")
-                        .font(.headline)
+                        .font(.title2.bold())
                     BulletedList(items: [
                         "Cider 2.5.3+ is installed (... > Updates)",
                         "Cider installed and running on your computer (Windows, macOS, or Linux)",
-                        "Your Device and Cider on the same local network (If using LAN)",
+                        "Your Device and Cider on the same local network (if using LAN)",
                         "Cider's RPC & WebSocket server enabled (Settings > Connectivity)"
                     ])
                     
                     Text("Connection Steps:")
-                        .font(.headline)
+                        .font(.title2.bold())
                     VStack(alignment: .leading, spacing: 15) {
                         GuideStep(number: 1, text: "Launch the Cider Remote app on your iPhone.")
-                        GuideStep(number: 2, text: "Open Cider on your Computer, tap the '...' menu, and visit 'Help > Connect a Remote' and create a device. (Some devices may prefer WAN over LAN.)")
+                        GuideStep(number: 2, text: "Open Cider on your Computer, tap the '...' menu, and visit 'Help > Connect a Remote app' and create a device. (Some devices may prefer WAN over LAN.)")
                         GuideStep(number: 3, text: "In Cider Remote, tap the plus icon in the top right corner, and use the camera to scan the QR code displayed in Cider.")
                         GuideStep(number: 4, text: "Give a name to your scanned device, make it simple to understand for clarity.")
                         GuideStep(number: 5, text: "Your iPhone should now be paired with Cider.")
                     }
                     
                     Text("Troubleshooting:")
-                        .font(.headline)
+                        .font(.title2.bold())
                     Text("If you can't connect:")
                         .font(.subheadline)
                     BulletedList(items: [
@@ -305,7 +305,7 @@ struct ConnectionGuideView: View {
                     ])
                     
                     Text("Firewall Settings:")
-                        .font(.subheadline)
+                        .font(.title2.bold())
                     BulletedList(items: [
                         "Windows: Allow Cider through Windows Defender Firewall (Inbound Port 10767)",
                         "macOS: Add Cider to allowed apps in Security & Privacy > Firewall",
@@ -313,14 +313,14 @@ struct ConnectionGuideView: View {
                     ])
                     
                     Text("For QR code scanning issues:")
-                        .font(.subheadline)
+                        .font(.title2.bold())
                     BulletedList(items: [
                         "Check if Remote has access to your camera",
                         "Ensure the QR code is clearly visible and well-lit",
                         "Try adjusting the distance between your phone and the screen"
                     ])
                     
-                    Text("For further assistance, please visit our Discord server or GitHub issues page.")
+                    Text("For further assistance, please visit our [Discord server](https://discord.gg/applemusic) or [GitHub issues](https://github.com/ciderapp/Cider-Remote/issues) page.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .padding(.top)
@@ -346,7 +346,7 @@ struct DeviceIconView: View {
     let device: Device
 
     var body: some View {
-        Image(uiImage: deviceImage)
+        deviceImage
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 40, height: 40)
@@ -355,17 +355,18 @@ struct DeviceIconView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    var deviceImage: UIImage {
+    var deviceImage: Image {
         let osType = device.os ?? device.platform
+
         switch osType.lowercased() {
         case "win32":
-            return UIImage(named: "Windows") ?? UIImage(systemName: "desktopcomputer")!
+            return Image("Windows")
         case "darwin":
-            return UIImage(named: "macOS") ?? UIImage(systemName: "desktopcomputer")!
+            return Image("macOS")
         case "linux":
-            return UIImage(named: "Linux") ?? UIImage(systemName: "desktopcomputer")!
+            return Image("Linux")
         default:
-            return UIImage(systemName: "desktopcomputer")!
+            return Image(systemName: "desktopcomputer")
         }
     }
 }
