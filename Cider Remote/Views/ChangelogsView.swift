@@ -289,20 +289,28 @@ extension Changelog {
                 "Cider Collective team in the contributors screen",
                 "Animated album covers",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
-                "Slowly moving color gradient in the background",
+                "Share lyrics by tap-and-holding a lyric",
+                "Tap a lyric to go and listen to it",
                 "Left-to-right and right-to-left lyrics",
+                "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
+                "Slowly moving color gradient in the background",
                 "New \"Cider Remote\" title integrated in the screen's top bar",
             ], modifications: [
                 "Temporary?: iOS 26+ only",
                 "The \"Cider Devices\" title has been replaced with \"Cider Remote\"",
                 "\"Library Browser\" button is always displayed now",
                 "A more Apple Music-like user interface when remote-ing",
+                "Much simpler, less buggy device list",
                 "Unified design in the changelogs screen and connection guide screen",
                 "More Liquid Glass",
                 "Contributors screen moved in the copyright section",
                 "Smaller \"Library Browser\" button to fit its new location",
-                "The message about Cider 4 & Remote v4.0.0 will now re-appear with new text"
+                "The message about Cider 4 & Remote v4.0.0 will now re-appear with new text",
+                "Fix: Random crash when opening the QR code scan",
+                "Fix: Library Browser cover images should load for most of them (still not all...)",
+                "Fix: Lyrics now correctly load"
             ], removals: [
+                "Lyrics cache",
                 "Background with blurred song cover",
                 "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
                 "View Models"
