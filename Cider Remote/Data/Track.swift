@@ -3,7 +3,7 @@
 import Foundation
 import UIKit
 
-struct Track: Codable, Equatable {
+struct Track: Codable, Identifiable, Equatable {
     let id: String
     let catalogId: String
     let title: String

@@ -55,6 +55,7 @@ struct LyricsView: View {
                                         lineSpacing: lineSpacing,
                                         changeTime: seekToTime
                                     )
+                                    .environmentObject(device)
                                 } else {
                                     ImmersiveLyricsView(
                                         lyrics: lyrics,
@@ -259,6 +260,9 @@ struct LyricsScrollView: View {
 
     @State private var isDragging: Bool = false
 
+    @State private var sharingTrack: Track? = nil
+    @State private var sharingLyric: LyricLine? = nil
+
     var body: some View {
         GeometryReader { geometry in
             ScrollViewReader { scrollView in
@@ -289,11 +293,39 @@ struct LyricsScrollView: View {
                                         .blur(radius: phase.isIdentity ? 0.0 : 8.5)
                                 }
                             }
-                            .buttonStyle(LyricButton())
+                            .buttonStyle(LyricButton(line))
                             .id(line.id)
+                            .contextMenu {
+                                Button {
+                                    self.sharingLyric = line
+                                } label: {
+                                    Label("Share lyric", systemImage: "square.and.arrow.up")
+                                }
+                                .disabled(self.sharingTrack == nil)
+                            }
                         }
                         Spacer(minLength: viewportHeight - 180) // Remaining space below lyrics
                     }
+                }
+                .fullScreenCover(item: $sharingLyric) {
+                    self.sharingLyric = nil
+                    
+                    Task {
+                        try? await Task.sleep(nanoseconds: 1_000_000) // idfk why?
+                        print(self.sharingLyric ?? "just checking yk?")
+                    }
+                } content: { lyric in
+                    if let track = self.sharingTrack {
+                        LyricShare(track: track, lyric: lyric)
+                    } else {
+                        ProgressView()
+                            .onAppear {
+                                self.sharingLyric = nil
+                            }
+                    }
+                }
+                .task {
+                    self.sharingTrack = await self.getCurrentTrack()
                 }
                 .scrollClipDisabled()
                 .onChange(of: activeLine) { _, newActiveLine in
@@ -308,6 +340,68 @@ struct LyricsScrollView: View {
             }
         }
         .frame(height: viewportHeight)
+    }
+
+    func getCurrentTrack() async -> Track? {
+        print("Fetching current track")
+        do {
+            let data = try await device.sendRequest(endpoint: "playback/now-playing", method: "GET")
+
+            if let jsonDict = data as? [String: Any], let info = jsonDict["info"] as? [String: Any] {
+                return self.getTrack(using: info)
+            } else {
+                throw NetworkError.decodingError
+            }
+        } catch {
+            print(error)
+        }
+        
+        return nil
+    }
+
+    private func getTrack(using info: [String: Any]) -> Track {
+        // Extract ID from playParams
+        var id: String?
+        var amId: String?
+
+        if let playParams = info["playParams"] as? [String: Any] {
+            id = playParams["id"] as? String
+            amId = playParams["catalogId"] as? String
+        }
+
+        let title = info["name"] as? String ?? ""
+        let artist = info["artistName"] as? String ?? ""
+        let album = info["albumName"] as? String ?? ""
+        let duration = info["durationInMillis"] as? Double ?? 0
+
+        if let artwork = info["artwork"] as? [String: Any],
+           var artworkUrl = artwork["url"] as? String {
+            // Replace placeholders in artwork URL
+            artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
+            artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
+
+            let data: Data? = nil
+
+            return Track(id: id ?? "",
+                         catalogId: amId ?? "",
+                         title: title,
+                         artist: artist,
+                         album: album,
+                         artwork: artworkUrl,
+                         duration: duration / 1000,
+                         artworkData: data ?? Data()
+            )
+        } else {
+            return Track(id: id ?? "",
+                         catalogId: amId ?? "",
+                         title: title,
+                         artist: artist,
+                         album: album,
+                         artwork: "",
+                         duration: duration / 1000,
+                         artworkData: Data()
+            )
+        }
     }
 }
 
