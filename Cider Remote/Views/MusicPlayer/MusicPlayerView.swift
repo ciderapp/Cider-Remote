@@ -672,7 +672,7 @@ struct MusicPlayerView: View {
 
     func getStorefront() async -> String? {
         do {
-            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]] else { return nil }
+            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]], !data.isEmpty else { return nil }
 
             if let storefrontId: String = data[0]["id"] as? String {
                 self.storefrontCache = storefrontId
@@ -1280,61 +1280,6 @@ struct MusicPlayerView: View {
 }
 
 // MARK: - Extensions
-
-fileprivate struct MoreActionsMenu: View {
-    var currentTrack: Track
-
-    var toggleAddToLibrary: () async -> Void
-    var toggleLike: () async -> Void
-
-    @Binding var isInLibrary: Bool
-    @Binding var isLiked: Bool
-
-    @State private var shareSheet: Bool = false
-
-    var body: some View {
-        Menu {
-            Button {
-                Task {
-                    await self.toggleAddToLibrary()
-                }
-            } label: {
-                Label(self.isInLibrary ? "Remove from library" : "Add to library", systemImage: self.isInLibrary ? "minus.circle.fill" :  "plus.circle.fill")
-            }
-
-            Divider()
-
-            ControlGroup {
-                Button {
-                    Task {
-                        await self.toggleLike()
-                    }
-                } label: {
-                    Label(self.isLiked ? "Unfavorite" : "Favorite", systemImage: self.isLiked ? "star.fill" : "star")
-                }
-
-                Button {
-                    self.shareSheet.toggle()
-                } label: {
-                    Label("Share", systemImage: "square.and.arrow.up.fill")
-                }
-            }
-        } label: {
-            Image(systemName: "ellipsis")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 20, height: 20)
-                .foregroundStyle(Color.primary)
-        }
-        .tint(Color.primary)
-        .padding(10.0)
-        .glassEffect(.regular.interactive(), in: Circle())
-        .sheet(isPresented: $shareSheet) {
-            ActivityViewController(item: .track(track: currentTrack))
-                .presentationDetents([.medium, .large])
-        }
-    }
-}
 
 private extension View {
     @ViewBuilder
