@@ -289,6 +289,7 @@ struct LyricsScrollView: View {
                                         .blur(radius: phase.isIdentity ? 0.0 : 8.5)
                                 }
                             }
+                            .buttonStyle(LyricButton())
                             .id(line.id)
                         }
                         Spacer(minLength: viewportHeight - 180) // Remaining space below lyrics
