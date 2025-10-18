@@ -76,6 +76,7 @@ struct LyricsView: View {
                     } else {
                         ProgressView()
                             .progressViewStyle(.circular)
+                            .foregroundStyle(Color.primary)
                             .frame(maxHeight: .infinity)
                     }
                 }
@@ -106,6 +107,9 @@ struct LyricsView: View {
 
 
     private func fetchAllLyrics() async {
+        defer { self.isLoading = false }
+        self.isLoading = true
+
         let success: Bool = await self.fetchLyricsAm() // apple music
         if !success {
             _ = await self.fetchLyricsMxm() // musixmatch
@@ -114,7 +118,6 @@ struct LyricsView: View {
 
     /// Returns true if the lyrics were found and fetched
     private func fetchLyricsMxm() async -> Bool {
-        defer { self.isLoading = false }
         guard let currentTrack else { return false }
 
         print("Current track ID: \(currentTrack.id)")
