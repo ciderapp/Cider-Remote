@@ -55,22 +55,12 @@ struct AddDeviceView: View {
             if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
                 QRScannerView(scannedCode: $scannedCode)
                     .overlay(alignment: .top) {
-                        if #available(iOS 26.0, *) {
-                            Text("Scan the Remote QR code")
-                                .font(.caption)
-                                .padding(.horizontal)
-                                .padding(.vertical, 7.5)
-                                .glassEffect()
-                                .padding(.top, 22.5)
-                        } else {
-                            Text("Scan the Remote QR code")
-                                .font(.caption)
-                                .padding(.horizontal)
-                                .padding(.vertical, 7.5)
-                                .background(Material.thin)
-                                .clipShape(.rect(cornerRadius: 15.5))
-                                .padding(.top, 22.5)
-                        }
+                        Text("Scan the Remote QR code")
+                            .font(.caption)
+                            .padding(.horizontal)
+                            .padding(.vertical, 7.5)
+                            .glassEffect()
+                            .padding(.top, 22.5)
                     }
             } else {
                 Text("Cider Remote cannot access the camera")
@@ -163,7 +153,10 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
         // Create a backdrop view
         var backdropView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         if #available(iOS 26.0, *) {
-            backdropView = UIVisualEffectView(effect: UIGlassEffect())
+            var glass: UIGlassEffect = UIGlassEffect(style: .regular)
+            glass.isInteractive = true
+
+            backdropView = UIVisualEffectView(effect: glass)
         }
 
         backdropView.layer.cornerRadius = closeButtonSize / 2
