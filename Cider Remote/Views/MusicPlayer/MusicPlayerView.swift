@@ -757,16 +757,14 @@ struct MusicPlayerView: View {
             let newTrack: Track = Track(id: id ?? "", catalogId: amId ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
 
             if self.currentTrack != newTrack {
+                let isSameAlbum: Bool = self.currentTrack?.album == newTrack.album
                 self.currentTrack = newTrack
-                self.videoArtwork = nil
-                self.player = nil
 
                 Task {
                     await self.updateQueue(newTrack: newTrack)
 
-                    self.videoArtwork = await self.getAnimatedCover(size: .tall)
-                    if self.videoArtwork != nil {
-                        self.setupAVPlayer()
+                    if !isSameAlbum {
+                        await self.resetAVPlayer()
                     }
                 }
             }
@@ -786,6 +784,16 @@ struct MusicPlayerView: View {
 
         print("Updated currentTrack: \(String(describing: self.currentTrack))")
         print("isPlaying: \(self.isPlaying)")
+    }
+
+    private func resetAVPlayer() async {
+        self.videoArtwork = nil
+        self.player = nil
+
+        self.videoArtwork = await self.getAnimatedCover(size: .tall)
+        if self.videoArtwork != nil {
+            self.setupAVPlayer()
+        }
     }
 
     private func handleColors() async {
