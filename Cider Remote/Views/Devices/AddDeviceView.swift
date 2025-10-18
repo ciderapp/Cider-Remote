@@ -197,7 +197,8 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
 
     private func startRunning() {
         DispatchQueue.global(qos: .background).async { [weak self] in
-            self?.captureSession.startRunning()
+            guard let self else { return }
+            self.captureSession.startRunning()
         }
     }
 
