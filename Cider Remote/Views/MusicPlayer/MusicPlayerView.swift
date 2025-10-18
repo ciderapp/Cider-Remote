@@ -115,6 +115,7 @@ struct MusicPlayerView: View {
 
             Spacer()
         }
+        .environment(\.colorScheme, ColorScheme.dark)
         .ignoresSafeArea(.container)
         .frame(maxHeight: .infinity)
         .background {
@@ -200,7 +201,6 @@ struct MusicPlayerView: View {
                 }
             }
         }
-        .environment(\.colorScheme, ColorScheme.dark)
     }
 
     @ViewBuilder
@@ -212,7 +212,7 @@ struct MusicPlayerView: View {
                     .frame(maxWidth: .infinity)
                     .mask(alignment: .center) {
                         LinearGradient(
-                            colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.75), Color.white.opacity(0.65), Color.white.opacity(0.5), Color.white.opacity(0.4), Color.clear],
+                            colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.75), Color.white.opacity(0.65), Color.white.opacity(0.5), Color.white.opacity(0.2), Color.clear],
                             startPoint: .top,
                             endPoint: .bottom
                         )
