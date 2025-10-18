@@ -8,8 +8,11 @@ struct LibraryPlaylistView: View {
     @State var playlist: LibraryPlaylist
 
     @State private var isLoading: Bool = true
+
     @State private var sharingTrack: LibraryTrack? = nil
     @State private var sharingImage: UIImage? = nil
+
+    @State private var viewingAlbum: LibraryAlbum? = nil
 
     init(_ playlist: LibraryPlaylist) {
         self.playlist = playlist
@@ -73,6 +76,16 @@ struct LibraryPlaylistView: View {
                                 } label: {
                                     Label("Play Later", image: "PlayLater")
                                 }
+
+                                Divider()
+
+                                Button {
+                                    Task {
+                                        self.viewingAlbum = await self.getAlbum(of: track)
+                                    }
+                                } label: {
+                                    Label("View Album", image: "BoxNote")
+                                }
                             } label: {
                                 Image(systemName: "ellipsis")
                             }
@@ -89,6 +102,10 @@ struct LibraryPlaylistView: View {
         }
         .navigationTitle(Text(self.playlist.name))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $viewingAlbum) { album in
+            LibraryAlbumView(album)
+                .environmentObject(device)
+        }
         .task {
             defer { self.isLoading = false }
             self.playlist.tracks = await self.getTracks(from: self.playlist)
@@ -212,5 +229,18 @@ extension LibraryPlaylistView {
         }
 
         return []
+    }
+
+    func getAlbum(of track: LibraryTrack) async -> LibraryAlbum? {
+        do {
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/songs/\(track.id)/albums") as? [[String: Any]] else { return nil }
+            print(data)
+
+            return LibraryAlbum(data: data[0])
+        } catch {
+            print("Error getting library: \(error)")
+        }
+
+        return nil
     }
 }
