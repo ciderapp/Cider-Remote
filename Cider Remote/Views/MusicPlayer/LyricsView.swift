@@ -21,7 +21,7 @@ struct LyricsView: View {
     @State private var isLoading: Bool = false
 
     private let lineSpacing: CGFloat = 18 // Increased spacing between lines
-    private let lyricAdvanceTime: Double = 0.3 // Advance lyrics 0.3 seconds early
+    public static let lyricAdvanceTime: Double = 0.2 // Advance lyrics 0.2 seconds early
 
     private var lyricProviderString: String? {
         guard let lyricsProvider else { return nil }
@@ -52,7 +52,8 @@ struct LyricsView: View {
                                         activeLine: $activeLine,
                                         currentTime: $currentTime,
                                         viewportHeight: geometry.size.height,
-                                        lineSpacing: lineSpacing
+                                        lineSpacing: lineSpacing,
+                                        changeTime: seekToTime
                                     )
                                 } else {
                                     ImmersiveLyricsView(
@@ -88,11 +89,20 @@ struct LyricsView: View {
             await self.fetchAllLyrics()
         }
         .onChange(of: currentTime) { _, newTime in
-            updateCurrentLyric(time: newTime + lyricAdvanceTime)
+            updateCurrentLyric(time: newTime + Self.lyricAdvanceTime)
         }
     }
 
     // MARK: - Methods
+
+    private func seekToTime(to newTime: Double) async {
+        print("Seeking to time: \(newTime)")
+        do {
+            _ = try await device.sendRequest(endpoint: "playback/seek", method: "POST", body: ["position": newTime])
+        } catch {
+            print(error)
+        }
+    }
 
     private func updateCurrentLyric(time: Double) {
         guard let currentLine = lyrics.last(where: { $0.timestamp <= time }) else {
@@ -221,9 +231,9 @@ struct LyricsView: View {
 
     private func getStorefront() async -> String? {
         do {
-            let data = try await device.sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": "/v1/me/storefront?limit=1"])
-            print(data)
-            if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any], let subdata = data["data"] as? [[String: Any]], let storefrontId = subdata[0]["id"] as? String {
+            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]], !data.isEmpty else { return nil }
+
+            if let storefrontId: String = data[0]["id"] as? String {
                 return storefrontId
             }
         } catch {
@@ -235,11 +245,17 @@ struct LyricsView: View {
 }
 
 struct LyricsScrollView: View {
+    @EnvironmentObject private var device: Device
+
     let lyrics: [LyricLine]
     @Binding var activeLine: LyricLine?
+
     @Binding var currentTime: Double
+
     let viewportHeight: CGFloat
     let lineSpacing: CGFloat
+
+    let changeTime: (Double) async -> Void
 
     @State private var isDragging: Bool = false
 
@@ -250,20 +266,30 @@ struct LyricsScrollView: View {
                     VStack(spacing: lineSpacing) {
                         Spacer(minLength: 180) // Space for one line above active lyric
                         ForEach(lyrics) { line in
-                            LyricLineView(
-                                lyric: line,
-                                isActive: line == activeLine,
-                                maxWidth: geometry.size.width - 20
-                            )
-                            .id(line.id)
-                            .frame(maxWidth: .infinity, alignment: line.altVoice ? .trailing : .leading)
-                            .padding(.horizontal, 20)
-                            .scrollTransition { content, phase in
-                                content
-                                    .offset(y: phase.isIdentity ? 0.0 : max(min(phase.value * 17.5, 17.5), -17.5))
-                                    .opacity(phase.isIdentity ? 1.0 : 0.85)
-                                    .blur(radius: phase.isIdentity ? 0.0 : 8.5)
+                            Button {
+                                Task {
+                                    defer {
+                                        self.activeLine = line
+                                        self.currentTime = line.timestamp + LyricsView.lyricAdvanceTime
+                                    }
+                                    await self.changeTime(line.timestamp + LyricsView.lyricAdvanceTime)
+                                }
+                            } label: {
+                                LyricLineView(
+                                    lyric: line,
+                                    isActive: line == activeLine,
+                                    maxWidth: geometry.size.width - 20
+                                )
+                                .frame(maxWidth: .infinity, alignment: line.altVoice ? .trailing : .leading)
+                                .padding(.horizontal, 20)
+                                .scrollTransition { content, phase in
+                                    content
+                                        .offset(y: phase.isIdentity ? 0.0 : max(min(phase.value * 17.5, 17.5), -17.5))
+                                        .opacity(phase.isIdentity ? 1.0 : 0.85)
+                                        .blur(radius: phase.isIdentity ? 0.0 : 8.5)
+                                }
                             }
+                            .id(line.id)
                         }
                         Spacer(minLength: viewportHeight - 180) // Remaining space below lyrics
                     }
