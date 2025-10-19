@@ -117,7 +117,7 @@ struct LyricShare: View {
             }
             .frame(width: Self.width)
             .padding(15.0)
-            .background(Color.black.opacity(0.4))
+            .background(Color.black.opacity(0.55))
             .environment(\.colorScheme, ColorScheme.dark)
         }
     }
