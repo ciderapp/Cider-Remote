@@ -85,18 +85,12 @@ struct NowPlayingLiveActivity: Widget {
 
     @ViewBuilder
     private func playBtn(using context: ActivityViewContext<NowPlayingLiveActivity.NowPlayingAttributes>) -> some View {
-        if #available(iOS 17.0, *) {
-            Button(intent: TogglePlayButtonIntent()) {
-                Image(systemName: "playpause.fill")
-                    .font(.title)
-                    .foregroundStyle(Color.white)
-            }
-            .buttonStyle(.plain)
-        } else {
-            Image(systemName: "waveform")
-                .font(.title2)
+        Button(intent: TogglePlayButtonIntent(device: .init(from: context.attributes.device))) {
+            Image(systemName: "playpause.fill")
+                .font(.title)
                 .foregroundStyle(Color.white)
         }
+        .buttonStyle(.plain)
     }
 
     struct NowPlayingAttributes: ActivityAttributes {
