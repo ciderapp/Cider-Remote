@@ -15,7 +15,7 @@ struct SettingsView: View {
     @AppStorage("refreshInterval") private var refreshInterval: Double = 10.0
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Feedback")) {
                     Button {
