@@ -292,6 +292,7 @@ extension Changelog {
                 "Share lyrics by tap-and-holding a lyric",
                 "Tap a lyric to go and listen to it",
                 "Left-to-right and right-to-left lyrics",
+                "Remote now displays the audio quality (Dolby Atmos, Lossless, Hi-Res Lossless...)",
                 "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
                 "Slowly moving color gradient in the background",
                 "New \"Cider Remote\" title integrated in the screen's top bar",
@@ -309,7 +310,7 @@ extension Changelog {
                 "Fix: Live Activity button should work properly whatever the device order",
                 "Fix: Random crash when opening the QR code scan",
                 "Fix: Library Browser cover images should load for most of them (still not all...)",
-                "Fix: Lyrics now correctly load"
+                "Fix: Lyrics now correctly load",
             ], removals: [
                 "TEMPORARY: Horizontal Layout",
                 "Lyrics cache",

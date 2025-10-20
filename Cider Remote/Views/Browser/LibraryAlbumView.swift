@@ -119,7 +119,11 @@ struct LibraryAlbumView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             defer { self.isLoading = false }
-            self.videoURL = await self.album.getAnimatedCover(using: device, size: .tall)
+
+            let amData: (URL?, Track.AudioType) = await self.album.getAnimatedCover(using: device, size: .tall)
+            self.videoURL = amData.0
+            self.album.audioType = amData.1
+
             self.album.tracks = await self.getTracks(from: self.album)
             self.setupPlayer()
 
@@ -150,6 +154,10 @@ struct LibraryAlbumView: View {
                                 .font(.body)
                                 .lineLimit(1)
                                 .foregroundStyle(Color.secondary)
+
+                            if self.album.audioType != .unknown {
+                                self.album.audioType.view
+                            }
                         }
                         .padding(10.0)
                         .frame(width: 250, alignment: .center)
@@ -206,6 +214,10 @@ struct LibraryAlbumView: View {
                     .font(.body)
                     .lineLimit(1)
                     .foregroundStyle(Color.secondary)
+
+                if self.album.audioType != .unknown {
+                    self.album.audioType.view
+                }
             }
         }
         .padding(.horizontal, self.videoURL == nil ? 5.0 : 0.0)

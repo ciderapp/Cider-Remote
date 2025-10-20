@@ -7,6 +7,7 @@ struct LibraryAlbum: Identifiable, Hashable {
     let title: String
     let artist: String
     let artwork: String
+    var audioType: Track.AudioType = .unknown
 
     var tracks: [LibraryTrack]? = nil
 
@@ -35,22 +36,32 @@ struct LibraryAlbum: Identifiable, Hashable {
         }
     }
 
-    func getAnimatedCover(using device: Device, size: Self.AnimatedCover = .square) async -> URL? {
+    func getAnimatedCover(using device: Device, size: Self.AnimatedCover = .square) async -> (URL?, Track.AudioType) {
         do {
             guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/albums/\(self.id)/catalog?extend=editorialVideo") as? [[String: Any]] else {
-                return nil
+                return (nil, .unknown)
             }
             
-            if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any], let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any] {
-                if let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
-                    return URL(string: squareStr)
+            if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any] {
+                print(attributes)
+
+                var audio: Track.AudioType = .unknown
+                if let audioTraits: [String] = attributes["audioTraits"] as? [String] {
+                    print(audioTraits)
+                    audio = Track.AudioType.find(audioTraits)
+                }
+
+                if let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any], let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
+                    return (URL(string: squareStr), audio)
+                } else {
+                    return (nil, audio)
                 }
             }
 
-            return nil
+            return (nil, .unknown)
         } catch {
             print("Error getting album details: \(error)")
-            return nil
+            return (nil, .unknown)
         }
     }
 

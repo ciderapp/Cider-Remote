@@ -46,6 +46,7 @@ struct MusicPlayerView: View {
     @State private var isLiked: Bool = false
     @State private var isInLibrary: Bool = false
     @State private var videoArtwork: URL? = nil
+    @State private var audioFormat: Track.AudioType = .unknown
     @State private var backgroundColors: [Color] = []
 
     // Popups
@@ -311,7 +312,15 @@ struct MusicPlayerView: View {
                         .opacity(self.stopTimeSlider ? 1.0 : 0.5)
                         .contentTransition(.identity)
 
-                    Spacer()
+                    if self.audioFormat == .unknown {
+                        Spacer()
+                    } else {
+                        Spacer()
+
+                        self.audioFormat.view
+
+                        Spacer()
+                    }
 
                     Text("-" + self.formatTime(self.duration - self.currentTime))
                         .font(.caption.bold(self.stopTimeSlider))
@@ -319,7 +328,7 @@ struct MusicPlayerView: View {
                         .opacity(self.stopTimeSlider ? 1.0 : 0.5)
                         .contentTransition(.identity)
                 }
-                .offset(y: 3.0 + (self.stopTimeSlider ? 12.0 : 0.0))
+                .offset(y: 5.0 + (self.stopTimeSlider ? 12.0 : 0.0))
             }
 
             HStack(spacing: 70.0) {
@@ -633,17 +642,21 @@ struct MusicPlayerView: View {
         }
     }
 
+    /// it also gets other stuff but shush who cares it works
     func getAnimatedCover(size: LibraryAlbum.AnimatedCover = .tall) async -> URL? {
         guard let currentTrack else { return nil }
+
         do {
             guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(currentTrack.catalogId)?include=albums&extend[albums]=editorialVideo") as? [[String: Any]] else { return nil }
 
-            print(data)
+            if let relation: [String: Any] = data[0]["relationships"] as? [String: Any], let album: [String: Any] = relation["albums"] as? [String: Any], let subdata: [[String: Any]] = album["data"] as? [[String: Any]], let attributes = subdata[0]["attributes"] as? [String: Any] {
 
-            if let relation: [String: Any] = data[0]["relationships"] as? [String: Any], let album: [String: Any] = relation["albums"] as? [String: Any], let subdata: [[String: Any]] = album["data"] as? [[String: Any]] {
-                guard let attributes = subdata[0]["attributes"] as? [String: Any], let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any] else { return nil }
+                if let audioTraits: [String] = attributes["audioTraits"] as? [String] {
+                    print(audioTraits)
+                    self.audioFormat = Track.AudioType.find(audioTraits)
+                }
 
-                if let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
+                if let videos: [String: Any] = attributes["editorialVideo"] as? [String: Any], let squareObj: [String: Any] = videos[size.rawValue] as? [String: Any], let squareStr: String = squareObj["video"] as? String {
                     return URL(string: squareStr)
                 }
             }
@@ -754,13 +767,14 @@ struct MusicPlayerView: View {
             artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
             artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
 
-            let newTrack: Track = Track(id: id ?? "", catalogId: amId ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
+            var newTrack: Track = Track(id: id ?? "", catalogId: amId ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
 
             if self.currentTrack != newTrack {
-                let isSameAlbum: Bool = self.currentTrack?.album == newTrack.album
-                self.currentTrack = newTrack
-
                 Task {
+                    newTrack.artworkData = await newTrack.getArtwork()?.pngData() ?? Data()
+                    let isSameAlbum: Bool = self.currentTrack?.album == newTrack.album
+                    self.currentTrack = newTrack
+
                     await self.updateQueue(newTrack: newTrack)
 
                     if !isSameAlbum {
@@ -817,48 +831,6 @@ struct MusicPlayerView: View {
         }
     }
 
-    func playFromQueue(_ track: Track) async {
-        guard let sourceQueue, let index = sourceQueue.tracks.firstIndex(where: { $0.id == track.id }) else { return }
-        print("[QUEUE] play from queue")
-
-        do {
-            _ = try await sendRequest(
-                endpoint: "playback/queue/change-to-index",
-                method: "POST",
-                body: ["index" : index + sourceQueue.offset]
-            )
-            await updateQueue(newTrack: track)
-        } catch {
-            handleError(error)
-        }
-    }
-
-    func moveQueue(from startIndex: Int, to destinationIndex: Int) async {
-        guard let sourceQueue, startIndex != destinationIndex else { return }
-        do {
-            _ = try await sendRequest(endpoint: "playback/queue/move-to-position",
-                                      method: "POST",
-                                      body: ["startIndex" : startIndex + sourceQueue.offset, "destinationIndex": destinationIndex + sourceQueue.offset]
-            )
-            try? await Task.sleep(nanoseconds: 500_000_000) // we don't wait, then the *fetchQueueItems* will error
-            await fetchQueueItems()
-        } catch {
-            handleError(error)
-        }
-    }
-
-    func removeQueue(index: Int) async {
-        guard let sourceQueue else { return }
-        do {
-            _ = try await sendRequest(endpoint: "playback/queue/remove-by-index",
-                                      method: "POST",
-                                      body: ["index": index + sourceQueue.offset]
-            )
-        } catch {
-            handleError(error)
-        }
-    }
-
     private func getTrack(using info: [String: Any]) -> Track {
         // Extract ID from playParams
         var id: String?
@@ -880,8 +852,6 @@ struct MusicPlayerView: View {
             artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
             artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
 
-            let data: Data? = nil
-
             return Track(id: id ?? "",
                          catalogId: amId ?? "",
                          title: title,
@@ -889,7 +859,7 @@ struct MusicPlayerView: View {
                          album: album,
                          artwork: artworkUrl,
                          duration: duration / 1000,
-                         artworkData: data ?? Data()
+                         artworkData: Data()
             )
         } else {
             return Track(id: id ?? "",
@@ -902,6 +872,19 @@ struct MusicPlayerView: View {
                          artworkData: Data()
             )
         }
+    }
+
+    func getArtwork(for url: URL?) async -> Data {
+        guard let url else { return Data() }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return data
+        } catch {
+            print("Error loading image: \(error)")
+        }
+
+        return Data()
     }
 
     func getCurrentVolume() async {
