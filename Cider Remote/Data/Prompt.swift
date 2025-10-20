@@ -55,13 +55,15 @@ struct Prompt {
                             .glassEffect(.regular.interactive().tint(Color.cider))
                     }
 
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Cancel")
-                            .foregroundStyle(Color(uiColor: UIColor.label))
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                            .glassEffect(.regular.interactive())
+                    if showCancel {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Cancel")
+                                .foregroundStyle(Color(uiColor: UIColor.label))
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .glassEffect(.regular.interactive())
+                        }
                     }
                 }
             } else {
