@@ -18,9 +18,7 @@ struct NowPlayingLiveActivity: Widget {
                 }
 
                 DynamicIslandExpandedRegion(.leading) {
-                    Image("Logo")
-                        .resizable()
-                        .scaledToFit()
+                    self.artwork(using: context)
                         .frame(width: 65, height: 65, alignment: .center)
                         .clipShape(RoundedRectangle(cornerRadius: 3.0))
                 }
@@ -42,7 +40,7 @@ struct NowPlayingLiveActivity: Widget {
                     .resizable()
                     .scaledToFit()
             }
-            .keylineTint(Color.pink)
+            .keylineTint(Color.accentColor)
         }
     }
 
@@ -50,13 +48,9 @@ struct NowPlayingLiveActivity: Widget {
     private func expandView(using context: ActivityViewContext<NowPlayingAttributes>, dynamicIsland: Bool = false) -> some View {
         HStack {
             if !dynamicIsland {
-                ZStack {
-                    Image(uiImage: UIImage.logo) // TEMPORARY SOLUTION
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40, alignment: .center)
-                        .clipShape(RoundedRectangle(cornerRadius: 3.0))
-                }
+                self.artwork(using: context)
+                    .frame(width: 40, height: 40, alignment: .center)
+                    .clipShape(RoundedRectangle(cornerRadius: 3.0))
             }
 
             VStack(alignment: .leading) {
@@ -93,6 +87,19 @@ struct NowPlayingLiveActivity: Widget {
         .buttonStyle(.plain)
     }
 
+    @ViewBuilder
+    private func artwork(using context: ActivityViewContext<NowPlayingLiveActivity.NowPlayingAttributes>) -> some View {
+//        if let data: Data = context.state.artwork, let ui: UIImage = UIImage(data: data) {
+//            Image(uiImage: ui)
+//                .resizable()
+//                .scaledToFit()
+//        } else {
+            Image("Logo")
+                .resizable()
+                .scaledToFit()
+//        }
+    }
+
     struct NowPlayingAttributes: ActivityAttributes {
         let device: Device
 
@@ -101,7 +108,7 @@ struct NowPlayingLiveActivity: Widget {
                 hasher.combine(trackInfo.id)
             }
 
-            var trackInfo: Track
+            var trackInfo: LiveActivityManager.DisplayingTrack
         }
     }
 }

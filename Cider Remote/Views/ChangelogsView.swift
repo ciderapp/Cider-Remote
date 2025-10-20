@@ -306,10 +306,12 @@ extension Changelog {
                 "Contributors screen moved in the copyright section",
                 "Smaller \"Library Browser\" button to fit its new location",
                 "The message about Cider 4 & Remote v4.0.0 will now re-appear with new text",
+                "Fix: Live Activity button should work properly whatever the device order",
                 "Fix: Random crash when opening the QR code scan",
                 "Fix: Library Browser cover images should load for most of them (still not all...)",
                 "Fix: Lyrics now correctly load"
             ], removals: [
+                "TEMPORARY: Horizontal Layout",
                 "Lyrics cache",
                 "Background with blurred song cover",
                 "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
