@@ -307,6 +307,7 @@ extension Changelog {
                 "Contributors screen moved in the copyright section",
                 "Smaller \"Library Browser\" button to fit its new location",
                 "The message about Cider 4 & Remote v4.0.0 will now re-appear with new text",
+                "Changed macOS icon for default macOS icon",
                 "Fix: Live Activity button should work properly whatever the device order",
                 "Fix: Random crash when opening the QR code scan",
                 "Fix: Library Browser cover images should load for most of them (still not all...)",
