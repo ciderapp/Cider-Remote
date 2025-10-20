@@ -106,7 +106,7 @@ struct UpdatePromptView: View {
     }
 
     var txt: some View {
-        Text("Welcome to Remote's biggest update, Remote v4.0.0. It features a complete redesign of the remote, duo lyrics, and the long-waited \"Shuffle\", \"Repeat\" and \"Autoplay\" buttons!")
+        Text("Welcome to Remote Beta v4.0.0. Please remember to report bugs and issues within the TestFlight feedback feature or GitHub issues. Cheers, Lumaa")
             .font(.subheadline)
             .multilineTextAlignment(.leading)
             .padding(.horizontal)
