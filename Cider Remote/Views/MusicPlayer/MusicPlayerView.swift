@@ -307,7 +307,7 @@ struct MusicPlayerView: View {
             .overlay(alignment: .bottom) {
                 HStack {
                     Text(self.formatTime(self.currentTime))
-                        .font(.caption.bold(self.stopTimeSlider))
+                        .font(.caption.bold(self.stopTimeSlider).monospacedDigit())
                         .foregroundStyle(self.stopTimeSlider ? Color.white : Color.secondary)
                         .opacity(self.stopTimeSlider ? 1.0 : 0.5)
                         .contentTransition(.identity)
@@ -323,7 +323,7 @@ struct MusicPlayerView: View {
                     }
 
                     Text("-" + self.formatTime(self.duration - self.currentTime))
-                        .font(.caption.bold(self.stopTimeSlider))
+                        .font(.caption.bold(self.stopTimeSlider).monospacedDigit())
                         .foregroundStyle(self.stopTimeSlider ? Color.white : Color.secondary)
                         .opacity(self.stopTimeSlider ? 1.0 : 0.5)
                         .contentTransition(.identity)
