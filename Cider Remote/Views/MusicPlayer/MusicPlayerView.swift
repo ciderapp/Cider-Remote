@@ -116,7 +116,6 @@ struct MusicPlayerView: View {
 
             Spacer()
         }
-        .environment(\.colorScheme, ColorScheme.dark)
         .ignoresSafeArea(.container)
         .frame(maxHeight: .infinity)
         .background {
@@ -161,6 +160,7 @@ struct MusicPlayerView: View {
         }
         .fullScreenCover(isPresented: $showingLibrary) {
             BrowserView(device: device)
+                .environment(\.colorScheme, systemColorScheme) // restore user's color scheme
         }
         .task {
             self.startListening()
@@ -202,6 +202,7 @@ struct MusicPlayerView: View {
                 }
             }
         }
+        .environment(\.colorScheme, ColorScheme.dark)
     }
 
     @ViewBuilder
