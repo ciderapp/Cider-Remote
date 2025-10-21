@@ -39,7 +39,7 @@ struct QueueView<Content : View>: View {
 
     @ViewBuilder
     private var queueView: some View {
-        if queueItems.count < 1 || (queueItems.count == 1 && queueItems.first == currentTrack) {
+        if queueItems.count < 1 || (queueItems.count == 1 && queueItems.first?.id == currentTrack?.id) {
             ContentUnavailableView("Queue empty", systemImage: "list.number", description: Text("Your Cider queue is empty"))
         } else {
             ForEach(queueItems, id: \.id) { track in
