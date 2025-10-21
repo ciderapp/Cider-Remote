@@ -87,12 +87,10 @@ struct Track: Codable, Identifiable, Equatable {
                     Label("Lossless", image: .lossless)
                         .foregroundStyle(Color.secondary)
                         .font(.callout)
-                        .opacity(0.5)
                 case .hiResLossless:
                     Label("Hi-Res Lossless", image: .lossless)
                         .foregroundStyle(Color.secondary)
                         .font(.callout)
-                        .opacity(0.5)
                 case .dolbyAtmos:
                     Image(.dolbyAtmos)
                         .resizable()

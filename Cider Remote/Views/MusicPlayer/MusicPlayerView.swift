@@ -12,7 +12,8 @@ import WidgetKit
 import AVKit
 
 struct MusicPlayerView: View {
-    @Environment(\.colorScheme) private var systemColorScheme
+    @Environment(\.colorScheme) private var systemColorScheme: ColorScheme
+    @Environment(\.scenePhase) private var scenePhase: ScenePhase
 
     let device: Device
 
@@ -202,6 +203,11 @@ struct MusicPlayerView: View {
                 }
             }
         }
+        .onChange(of: scenePhase) { _, newValue in
+            if newValue == .active, let player {
+                player.play()
+            }
+        }
         .environment(\.colorScheme, ColorScheme.dark)
     }
 
@@ -319,6 +325,7 @@ struct MusicPlayerView: View {
                         Spacer()
 
                         self.audioFormat.view
+                            .opacity(0.5)
 
                         Spacer()
                     }
