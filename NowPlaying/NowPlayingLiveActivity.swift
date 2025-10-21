@@ -40,7 +40,7 @@ struct NowPlayingLiveActivity: Widget {
                     .resizable()
                     .scaledToFit()
             }
-            .keylineTint(Color.accentColor)
+            .keylineTint(Color.cider)
         }
     }
 
