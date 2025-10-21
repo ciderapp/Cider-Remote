@@ -1,14 +1,6 @@
-# Remote v4.0.0
-You are currently viewing the Cider Remote source code for the v4.0.0 version, which changes the user interface for a much more Apple Music-like experience, with the new logistic of Cider 4.
-
-This version is currently work in progress, which means that everything you see and do may cause unexpected behaviors.
-
-Please be warned that all previously existing features from v3.1.0 (and less) may not end up in v4.0.0.
-
-# Remote v3.1.0
 <p align="center">
     <a href="https://cider.sh/remote">
-        <img src="https://cider.sh/og-remote.png" alt="Cider Remote Banner">
+        <img src="./README_data/AppBanner.png" alt="Cider Remote Banner">
     </a>
     <a href="https://apps.apple.com/app/id6670149407">
         <img src="https://apps.lumaa.fr/assets/images/en_app_store_black_badge.svg" alt="Cider Remote on the App Store" width=200 />
