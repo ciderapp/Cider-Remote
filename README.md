@@ -8,7 +8,11 @@
 </p>
 
 # About Remote
+
 [Cider Remote](https://cider.sh/remote) is a native iOS app, built with [SwiftUI](https://developer.apple.com/swiftui/) and [Socket.io](https://socket.io/), that gives remote controls to [Cider](https://cider.sh/).
+
+> [!NOTE]
+> Cider Remote is also available on Android: [`ciderapp/Cider-Remote-RN`](https://github.com/ciderapp/Cider-Remote-RN)
 
 [Cider Remote](https://cider.sh/remote) is the official [Cider](https://cider.sh/) remote control app on iPhone and iPad using iOS 17 or later, with these features:
 
@@ -24,6 +28,7 @@
 # Feedback
 
 To make a feedback about Cider Remote, you can do the following:
+
 - You can [write a review](https://apps.apple.com/app/id6670149407?action=write-review) on the App Store.
 - You can send a feedback on TestFlight with an attached screenshot or not. It is recommended to also share your email address with your TestFlight feedback, but not required.
 - Send a message in [#cider-chat](https://discord.com/channels/843954443845238864/1254248941780729898) on the [Cider Discord](https://discord.gg/applemusic) server
@@ -33,9 +38,10 @@ To make a feedback about Cider Remote, you can do the following:
 # Connection Guide
 
 This guide may help you through the connection of Cider Remote to Cider\
-*This guide works for iPhones and iPads in iOS 17 or later*
+_This guide works for iPhones and iPads in iOS 17 or later_
 
 ### Prerequisites
+
 - Ensure that Cider is installed with version v2.5.0 or later and is running on your computer (Windows, macOS, or Linux).
 - For LAN mode, your iPhone should be connected to the same local network as Cider.
 - For WAN mode, you can control Cider from anywhere, as long as both devices have internet access.
@@ -46,6 +52,7 @@ This guide may help you through the connection of Cider Remote to Cider\
 #### LAN Mode (Local Area Network)
 
 1. **Configure Cider to Pair with Your iPhone:**
+
    - On your computer, open Cider.
    - Navigate to **Settings > Help > Connect a Remote app**.
    - Click on the **Pair** button at the top of the alert.
@@ -58,6 +65,7 @@ This guide may help you through the connection of Cider Remote to Cider\
    - Scan the QR Code on Cider, then choose your device's name.
 
 #### WAN Mode (Wide Area Network)
+
 If you need to control Cider from a different network or while away from home, you can switch to WAN mode.
 
 1. **Switch to WAN Mode:**
@@ -67,6 +75,7 @@ If you need to control Cider from a different network or while away from home, y
    - Once paired, Cider Remote will allow you to control playback from anywhere with internet access (thanks to [localtunnel](https://theboroer.github.io/localtunnel-www/)), not just on the same local network.
 
 ## Important Notes
+
 - **LAN Mode:** Cider Remote works over a local network, using the RPC server on port **10767**. Ensure that both your iPhone and Cider are on the same network.
 - **WAN Mode:** Cider Remote in WAN mode allows for control from anywhere with internet access. Be sure that both devices have a stable internet connection.
 - **Firewall Settings:** If Cider Remote cannot connect to Cider, you may need to allow Cider or port **10767** through your computer’s firewall.
@@ -75,13 +84,16 @@ If you need to control Cider from a different network or while away from home, y
 ## Troubleshooting
 
 ### Common Issues & Solutions
+
 - **Cider Remote Cannot Find Cider (LAN):**
+
   - Ensure that both your iPhone and Cider client are connected to the same local network.
   - Check if the RPC server is running on Cider (port 10767).
   - Restart both your iPhone and the Cider client to refresh the connection.
   - **Solution:** If the LAN connection fails, try using **WAN mode** to control Cider over the internet.
 
 - **Firewall Issues:**
+
   - If you're using a firewall, make sure that Cider or port **10767** is allowed through.
   - On Windows, go to **Control Panel > System and Security > Windows Defender Firewall > Allow an app or feature through Windows Defender Firewall**. Ensure that Cider is listed and allowed.
   - On macOS, go to **System Preferences > Network > Firewall > Options**, and add Cider to the list of allowed apps.
@@ -101,6 +113,7 @@ By following these steps, you should be able to set up and use Cider Remote with
 Join the [TestFlight beta](https://testflight.apple.com/join/qTeV2T2w) here.
 
 # License & Copyright
+
 This project is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license. See the [LICENSE](./LICENSE) file for details.
 
 © Cider Collective 2024-2025
