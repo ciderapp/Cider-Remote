@@ -58,7 +58,7 @@ struct DevicesView: View {
                 Button {
                     isShowingGuide = true
                 } label: {
-                    Label("Connection Guide", systemImage: "questionmark.circle")
+                    Label("Connection Guide", systemImage: "book.and.wrench")
                         .foregroundStyle(Color.cider)
                 }
             }
