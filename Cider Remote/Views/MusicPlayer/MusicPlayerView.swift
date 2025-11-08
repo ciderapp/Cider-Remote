@@ -91,6 +91,67 @@ struct MusicPlayerView: View {
     // MARK: - View
 
     var body: some View {
+        ZStack {
+            if userDevice.horizontalOrientation.isPortrait() {
+                self.portrait
+            } else if userDevice.horizontalOrientation.isLandscape() {
+                self.landscape(userDevice.horizontalOrientation)
+            }
+        }
+        .fullScreenCover(isPresented: $showingLibrary) {
+            BrowserView(device: device)
+                .environment(\.colorScheme, systemColorScheme) // restore user's color scheme
+        }
+        .task {
+            self.startListening()
+
+            await self.initializePlayer()
+            await MainActor.run {
+                withAnimation {
+                    isLoading = false
+                }
+            }
+        }
+        .onChange(of: showingQueue) { _, newValue in
+            if let player {
+                if newValue {
+                    player.pause()
+                } else {
+                    player.play()
+                }
+            }
+
+            if newValue {
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingLyrics = false
+                }
+            }
+        }
+        .onChange(of: showingLyrics) { _, newValue in
+            if let player {
+                if newValue {
+                    player.pause()
+                } else {
+                    player.play()
+                }
+            }
+
+            if newValue {
+                withAnimation(.easeOut.speed(1.3)) {
+                    self.showingQueue = false
+                }
+            }
+        }
+        .onChange(of: scenePhase) { _, newValue in
+            if newValue == .active, let player {
+                player.play()
+            }
+        }
+        .environment(\.colorScheme, ColorScheme.dark)
+    }
+
+    @ViewBuilder
+    private var portrait: some View {
         VStack {
             if expandedView {
                 artwork
@@ -159,56 +220,81 @@ struct MusicPlayerView: View {
             }
             .padding(.bottom, 30.0)
         }
-        .fullScreenCover(isPresented: $showingLibrary) {
-            BrowserView(device: device)
-                .environment(\.colorScheme, systemColorScheme) // restore user's color scheme
-        }
-        .task {
-            self.startListening()
+    }
 
-            await self.initializePlayer()
-            await MainActor.run {
-                withAnimation {
-                    isLoading = false
-                }
+    @ViewBuilder
+    private func landscape(_ orientation: UserDevice.HorizontalOrientation) -> some View {
+        SidedStack(side: orientation == .landscapeLeft ? SidedStack.Side.left : SidedStack.Side.right) {
+            if expandedView {
+                artwork
+                    .padding(.top, self.videoArtwork != nil ? 0.0 : Self.horizontalPadding)
+                    .padding(.horizontal, self.videoArtwork != nil ? 0.0 : 80.0)
             }
-        }
-        .onChange(of: showingQueue) { _, newValue in
-            if let player {
-                if newValue {
-                    player.pause()
+
+            if self.showingQueue {
+                QueueView(device: device, queueItems: $queueItems, sourceQueue: $sourceQueue, currentTrack: $currentTrack) {
+                    queueActions
+                        .padding(.horizontal, Self.horizontalPadding)
+                }
+                .minimalView()
+            }
+        } `right`: {
+            VStack {
+                if !self.showingLyrics {
+                    trackData
+                        .padding(.horizontal, Self.horizontalPadding)
+
+                    playbackActions
+                        .padding(.horizontal, Self.horizontalPadding)
+                        .transition(
+                            .move(edge: .bottom)
+                            .combined(with: .opacity)
+                            .animation(.spring(duration: 0.4))
+                        )
                 } else {
-                    player.play()
+                    Spacer()
                 }
-            }
 
-            if newValue {
-                withAnimation(.easeOut.speed(1.3)) {
-                    self.showingLyrics = false
-                }
+                navigationActions
+                    .padding(.horizontal, 30.0)
+                    .padding(.vertical, 10.0)
             }
+            .frame(height: 350)
         }
-        .onChange(of: showingLyrics) { _, newValue in
-            if let player {
-                if newValue {
-                    player.pause()
-                } else {
-                    player.play()
-                }
-            }
+        .ignoresSafeArea(.container)
+        .background {
+            ZStack {
+                Rectangle()
+                    .fill(Color.black)
+                    .ignoresSafeArea()
 
-            if newValue {
-                withAnimation(.easeOut.speed(1.3)) {
-                    self.showingQueue = false
+                if self.backgroundColors.count == 1 {
+                    Rectangle()
+                        .fill(self.backgroundColors[0])
+                        .ignoresSafeArea()
+                } else if self.backgroundColors.count == 25 {
+                    AnimatedMeshGradientView(colors: $backgroundColors, amplify: 0.25)
+                        .ignoresSafeArea()
+                        .opacity(0.3)
                 }
             }
         }
-        .onChange(of: scenePhase) { _, newValue in
-            if newValue == .active, let player {
-                player.play()
+        .overlay(alignment: .center) {
+            if self.showingLyrics {
+                LyricsView(device: device, currentTrack: $currentTrack, currentTime: $currentTime)
+                    .frame(maxHeight: .infinity)
             }
         }
-        .environment(\.colorScheme, ColorScheme.dark)
+        .onAppear {
+#if !WIDGET
+            self.alwaysOn(UserDefaults.standard.bool(forKey: "alwaysOn"))
+#endif
+        }
+        .onDisappear {
+#if !WIDGET
+            self.alwaysOn(false)
+#endif
+        }
     }
 
     @ViewBuilder
@@ -216,14 +302,32 @@ struct MusicPlayerView: View {
         if let track = self.currentTrack {
             if videoArtwork != nil && expandedView, let player {
                 UninteractableVideoPlayer(player: player)
-                    .aspectRatio(LibraryAlbum.AnimatedCover.tall.ratio, contentMode: .fit)
+                    .aspectRatio(userDevice.horizontalOrientation.isPortrait() ? LibraryAlbum.AnimatedCover.tall.ratio : LibraryAlbum.AnimatedCover.square.ratio, contentMode: .fit)
                     .frame(maxWidth: .infinity)
                     .mask(alignment: .center) {
-                        LinearGradient(
-                            colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.75), Color.white.opacity(0.65), Color.white.opacity(0.5), Color.white.opacity(0.2), Color.clear],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        if userDevice.horizontalOrientation.isPortrait() {
+                            LinearGradient(
+                                colors: [Color.white, Color.white, Color.white, Color.white.opacity(0.75), Color.white.opacity(0.65), Color.white.opacity(0.5), Color.white.opacity(0.2), Color.clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        } else {
+                            RadialGradient(
+                                colors: [
+                                    Color.white,
+                                    Color.white,
+                                    Color.white,
+                                    Color.white.opacity(0.75),
+                                    Color.white.opacity(0.65),
+                                    Color.white.opacity(0.5),
+                                    Color.white.opacity(0.2),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 180
+                            )
+                        }
                     }
             } else {
                 AsyncImage(url: URL(string: track.artwork)) { phase in
@@ -520,6 +624,13 @@ struct MusicPlayerView: View {
         }
 
         newPlayer.play()
+    }
+
+    private func alwaysOn(_ bool: Bool) {
+#if !WIDGET
+        UIApplication.shared.isIdleTimerDisabled = bool
+        print("always-\(bool ? "on" : "off")")
+#endif
     }
 
     // MARK: - Model

@@ -313,7 +313,6 @@ extension Changelog {
                 "Fix: Library Browser cover images should load for most of them (still not all...)",
                 "Fix: Lyrics now correctly load",
             ], removals: [
-                "TEMPORARY: Horizontal Layout",
                 "Lyrics cache",
                 "Background with blurred song cover",
                 "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
