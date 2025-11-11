@@ -38,7 +38,7 @@ struct LibraryAlbum: Identifiable, Hashable {
 
     func getAnimatedCover(using device: Device, size: Self.AnimatedCover = .square) async -> (URL?, Track.AudioType) {
         do {
-            guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/albums/\(self.id)/catalog?extend=editorialVideo") as? [[String: Any]] else {
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/albums/\(self.id)/catalog?extend=editorialVideo") as? [[String: Any]], data.count > 0 else {
                 return (nil, .unknown)
             }
             

@@ -766,7 +766,7 @@ struct MusicPlayerView: View {
         guard let currentTrack else { return nil }
 
         do {
-            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(currentTrack.catalogId)?include=albums&extend[albums]=editorialVideo") as? [[String: Any]] else { return nil }
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(currentTrack.catalogId)?include=albums&extend[albums]=editorialVideo") as? [[String: Any]], data.count > 0 else { return nil }
 
             if let relation: [String: Any] = data[0]["relationships"] as? [String: Any], let album: [String: Any] = relation["albums"] as? [String: Any], let subdata: [[String: Any]] = album["data"] as? [[String: Any]], let attributes = subdata[0]["attributes"] as? [String: Any] {
 
