@@ -4,6 +4,7 @@ import SwiftUI
 
 struct DeviceRowView: View {
     @ObservedObject var device: Device
+    var hasCurrentMusic: Bool = false
 
     @AppStorage("deviceDetails") private var deviceDetails: Bool = false
 
@@ -39,6 +40,13 @@ struct DeviceRowView: View {
             }
 
             Spacer()
+            
+            if hasCurrentMusic && device.isActive {
+                Image(systemName: "music.note")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+                    .padding(.trailing, 8)
+            }
 
             StatusIndicator(status: self.status)
         }
