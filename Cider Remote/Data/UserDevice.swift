@@ -17,9 +17,12 @@ class UserDevice: ObservableObject {
         get {
             prevOrientation = _horizontalOrientation
             switch self.orientation {
-                case .unknown, .portrait, .portraitUpsideDown:
+                case .unknown, .portrait:
                     _horizontalOrientation = .portrait
                     return .portrait
+                case .portraitUpsideDown:
+                    _horizontalOrientation = .portraitDown
+                    return .portraitDown
                 case .landscapeLeft:
                     _horizontalOrientation = .landscapeLeft
                     return .landscapeLeft
@@ -55,5 +58,13 @@ class UserDevice: ObservableObject {
         case portraitDown
         case landscapeLeft
         case landscapeRight
+
+        func isPortrait() -> Bool {
+            return self == .portrait || self == .portraitDown
+        }
+
+        func isLandscape() -> Bool {
+            return self == .landscapeLeft || self == .landscapeRight
+        }
     }
 }

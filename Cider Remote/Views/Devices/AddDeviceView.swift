@@ -44,6 +44,13 @@ struct AddDeviceView: View {
                     .textFieldStyle(.roundedBorder)
 
                 Button {
+                    self.jsonTxt = "{\"address\":\"\",\"token\":\"\",\"method\":\"lan\",\"initialData\":{\"version\":\"4.0.0\",\"platform\":\"genten\",\"os\":\"darwin\"}}"
+                } label: {
+                    Text(String("Sample Data (add token & address)"))
+                }
+                .buttonStyle(.bordered)
+
+                Button {
                     fetchAction(jsonTxt)
                     isShowingScanner = false
                 } label: {

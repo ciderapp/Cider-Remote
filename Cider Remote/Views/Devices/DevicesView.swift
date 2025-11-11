@@ -28,58 +28,55 @@ struct DevicesView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            List {
-                ForEach(devices) { device in
-                    Button {
-                        guard device.isActive else { return }
-
-                        self.viewingDevice = device
-                    } label: {
-                        DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
-                    }
-                    .tint(Color.primary)
-                    .onLongPressGesture {
-                        guard device.isActive else { return }
-                        selectedDeviceForSending = device
-                        currentMusicService.updateCurrentTrack()
-                        // Add a small delay to allow track info to update
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            showingSendToCiderAlert = true
-                        }
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            DeviceManager.shared.remove(device)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .contextMenu {
-                        if device.isActive {
-                            Button {
-                                selectedDeviceForSending = device
-                                currentMusicService.updateCurrentTrack()
-                                // Add a small delay to allow track info to update
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    showingSendToCiderAlert = true
-                                }
-                            } label: {
-                                Label("Send to Cider", systemImage: "music.note.list")
-                            }
-                            .disabled(currentMusicService.currentTrack?.hasValidData != true)
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
-            .task {
-                await self.refreshDevices()
-            }
-            .refreshable {
-                await self.refreshDevices()
-            }
+        List {
+            ForEach(devices) { device in
+                 Button(role: .destructive) {
+                     DeviceManager.shared.remove(device)
+                 } label: {
+                     DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
+                 }
+                 .tint(Color.primary)
+                 .onLongPressGesture {
+                     guard device.isActive else { return }
+                     selectedDeviceForSending = device
+                     currentMusicService.updateCurrentTrack()
+                     // Add a small delay to allow track info to update
+                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                         showingSendToCiderAlert = true
+                     }
+                 }
+                 .swipeActions(edge: .trailing) {
+                     Button(role: .destructive) {
+                         DeviceManager.shared.remove(device)
+                     } label: {
+                         Label("Delete", systemImage: "trash")
+                     }
+                 }
+                 .contextMenu {
+                     if device.isActive {
+                         Button {
+                             selectedDeviceForSending = device
+                             currentMusicService.updateCurrentTrack()
+                             // Add a small delay to allow track info to update
+                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                 showingSendToCiderAlert = true
+                             }
+                         } label: {
+                             Label("Send to Cider", systemImage: "music.note.list")
+                         }
+                         .disabled(currentMusicService.currentTrack?.hasValidData != true)
+                     }
+                 }
+             }
         }
+        .listStyle(.insetGrouped)
+        .task {
+            await self.refreshDevices()
+        }
+        .refreshable {
+            await self.refreshDevices()
+        }
+
         .toolbar {
             ToolbarItem(placement: .principal) {
                 header
@@ -89,7 +86,7 @@ struct DevicesView: View {
                 Button {
                     isShowingGuide = true
                 } label: {
-                    Label("Connection Guide", systemImage: "questionmark.circle")
+                    Label("Connection Guide", systemImage: "book.and.wrench")
                         .foregroundStyle(Color.cider)
                 }
             }

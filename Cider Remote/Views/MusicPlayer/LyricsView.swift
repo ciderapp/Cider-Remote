@@ -65,7 +65,7 @@ struct LyricsView: View {
                                     )
                                 }
                             }
-                            .overlay(alignment: .bottom) {
+                            .overlay(alignment: UserDevice.shared.horizontalOrientation.isPortrait() ? .bottom : .top) {
                                 if let lyricProviderString {
                                     Text(lyricProviderString)
                                         .font(.callout)

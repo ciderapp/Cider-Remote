@@ -102,6 +102,7 @@ struct LibraryAlbumView: View {
                                 }
                             } label: {
                                 Image(systemName: "ellipsis")
+                                    .padding(7.0)
                             }
                             .disabled(track.catalogId == "[UNKNOWN]")
                             .tint(Color(uiColor: UIColor.label))
@@ -184,6 +185,20 @@ struct LibraryAlbumView: View {
                     .frame(width: 220, height: 220)
                 }
                 .contextMenu {
+                    Button {
+                        Task {
+                            guard let url = URL(string: album.artwork),
+                                  let (data, _) = try? await URLSession.shared.data(from: url),
+                                  let image = UIImage(data: data) else {
+                                return
+                            }
+
+                            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                        }
+                    } label: {
+                        Label("Save artwork", systemImage: "photo.badge.plus")
+                    }
+
                     Button {
                         Task {
                             guard let url = URL(string: album.artwork),
@@ -335,7 +350,7 @@ extension LibraryAlbumView {
 
     func getAlbum(using track: LibraryTrack) async {
         do {
-            guard let data = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums") as? [[String: Any]] else { return }
+            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/catalog/us/songs/\(track.catalogId)/albums") as? [[String: Any]], data.count > 0 else { return }
 
             if let attributes: [String: Any] = data[0]["attributes"] as? [String: Any], attributes["isPrerelease"] as? Int == 1 {
                 let dateFormat: DateFormatter = .init()
