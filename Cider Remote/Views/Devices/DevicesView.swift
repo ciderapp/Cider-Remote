@@ -36,36 +36,26 @@ struct DevicesView: View {
                      DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
                  }
                  .tint(Color.primary)
-                 .onLongPressGesture {
-                     guard device.isActive else { return }
-                     selectedDeviceForSending = device
-                     currentMusicService.updateCurrentTrack()
-                     // Add a small delay to allow track info to update
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                         showingSendToCiderAlert = true
-                     }
-                 }
-                 .swipeActions(edge: .trailing) {
+                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                      Button(role: .destructive) {
                          DeviceManager.shared.remove(device)
                      } label: {
                          Label("Delete", systemImage: "trash")
                      }
-                 }
-                 .contextMenu {
-                     if device.isActive {
-                         Button {
-                             selectedDeviceForSending = device
-                             currentMusicService.updateCurrentTrack()
-                             // Add a small delay to allow track info to update
-                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                 showingSendToCiderAlert = true
-                             }
-                         } label: {
-                             Label("Send to Cider", systemImage: "music.note.list")
+                     .tint(Color.red)
+
+                     Button {
+                         selectedDeviceForSending = device
+                         currentMusicService.updateCurrentTrack()
+                         // Add a small delay to allow track info to update
+                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                             showingSendToCiderAlert = true
                          }
-                         .disabled(currentMusicService.currentTrack?.hasValidData != true)
+                     } label: {
+                         Label("Send to Cider", systemImage: "music.note.list")
                      }
+                     .tint(Color.pink) // AM color? allegedly
+                     .disabled(!(currentMusicService.currentTrack?.hasValidData ?? false) || !device.isActive)
                  }
              }
         }
