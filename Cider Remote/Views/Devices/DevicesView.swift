@@ -21,34 +21,33 @@ struct DevicesView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            List {
-                ForEach(devices) { device in
-                    Button {
-                        guard device.isActive else { return }
+        List {
+            ForEach(devices) { device in
+                Button {
+                    guard device.isActive else { return }
 
-                        self.viewingDevice = device
+                    self.viewingDevice = device
+                } label: {
+                    DeviceRowView(device: device)
+                }
+                .tint(Color.primary)
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        DeviceManager.shared.remove(device)
                     } label: {
-                        DeviceRowView(device: device)
-                    }
-                    .tint(Color.primary)
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            DeviceManager.shared.remove(device)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }
-            .listStyle(.insetGrouped)
-            .task {
-                await self.refreshDevices()
-            }
-            .refreshable {
-                await self.refreshDevices()
-            }
         }
+        .listStyle(.insetGrouped)
+        .task {
+            await self.refreshDevices()
+        }
+        .refreshable {
+            await self.refreshDevices()
+        }
+
         .toolbar {
             ToolbarItem(placement: .principal) {
                 header
