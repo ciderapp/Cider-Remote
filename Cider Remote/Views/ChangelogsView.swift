@@ -283,7 +283,7 @@ struct Changelog: Hashable, Identifiable {
 extension Changelog {
     /// Remote 4.0.0
     static var v400: Changelog {
-        var temp = Changelog(version: "4.0.0", authors: ["Lumaa"], commits: "main...v4")
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa", "Deadfrost"], commits: "main...v4")
         temp = temp
             .setChanges(additions: [
                 "Cider Collective team in the contributors screen",
@@ -296,6 +296,7 @@ extension Changelog {
                 "Remote now displays the audio quality (Dolby Atmos, Lossless, Hi-Res Lossless...)",
                 "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
                 "Slowly moving color gradient in the background",
+                "Swipe a Cider device to the left to send your iPhone's/iPad's playing song to Cider",
                 "New \"Cider Remote\" title integrated in the screen's top bar",
             ], modifications: [
                 "Temporary?: iOS 26+ only",
