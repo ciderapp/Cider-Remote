@@ -88,6 +88,7 @@ struct LibraryPlaylistView: View {
                                 }
                             } label: {
                                 Image(systemName: "ellipsis")
+                                    .padding(7.0)
                             }
                             .disabled(track.catalogId == "[UNKNOWN]")
                             .tint(Color(uiColor: UIColor.label))
@@ -144,10 +145,24 @@ struct LibraryPlaylistView: View {
                               let image = UIImage(data: data) else {
                             return
                         }
+
+                        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                    }
+                } label: {
+                    Label("Save artwork", systemImage: "photo.badge.plus")
+                }
+
+                Button {
+                    Task {
+                        guard let url = URL(string: self.playlist.artwork),
+                              let (data, _) = try? await URLSession.shared.data(from: url),
+                              let image = UIImage(data: data) else {
+                            return
+                        }
                         self.sharingImage = image
                     }
                 } label: {
-                    Label("Share image", systemImage: "square.and.arrow.up")
+                    Label("Share artwork", systemImage: "square.and.arrow.up")
                 }
             }
             .sheet(item: Binding<UIImage?>(
