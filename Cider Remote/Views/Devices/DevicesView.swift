@@ -29,35 +29,47 @@ struct DevicesView: View {
 
     var body: some View {
         List {
-            ForEach(devices) { device in
-                 Button(role: .destructive) {
-                     DeviceManager.shared.remove(device)
-                 } label: {
-                     DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
-                 }
-                 .tint(Color.primary)
-                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                     Button(role: .destructive) {
-                         DeviceManager.shared.remove(device)
-                     } label: {
-                         Label("Delete", systemImage: "trash")
-                     }
-                     .tint(Color.red)
+            if devices.count > 0 {
+                ForEach(devices) { device in
+                    Button {
+                        self.viewingDevice = device
+                    } label: {
+                        DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
+                    }
+                    .tint(Color.primary)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            DeviceManager.shared.remove(device)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .tint(Color.red)
 
-                     Button {
-                         selectedDeviceForSending = device
-                         currentMusicService.updateCurrentTrack()
-                         // Add a small delay to allow track info to update
-                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                             showingSendToCiderAlert = true
-                         }
-                     } label: {
-                         Label("Send to Cider", systemImage: "music.note.list")
-                     }
-                     .tint(Color.pink) // AM color? allegedly
-                     .disabled(!(currentMusicService.currentTrack?.hasValidData ?? false) || !device.isActive)
-                 }
-             }
+                        Button {
+                            selectedDeviceForSending = device
+                            currentMusicService.updateCurrentTrack()
+                            // Add a small delay to allow track info to update
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                showingSendToCiderAlert = true
+                            }
+                        } label: {
+                            Label("Send to Cider", systemImage: "music.note.list")
+                        }
+                        .tint(Color.pink) // AM color? allegedly
+                        .disabled(!(currentMusicService.currentTrack?.hasValidData ?? false) || !device.isActive)
+                    }
+                }
+            } else {
+                ContentUnavailableView {
+                    Text("No devices")
+                        .bold()
+                } description: {
+                    Text("Add a Cider device by tapping the plus icon in the top right corner. Troubleshoot errors with the button next to it.")
+                }
+                .listRowInsets(.all, 0.0)
+                .listRowSpacing(0.0)
+                .listRowBackground(Color.clear)
+            }
         }
         .listStyle(.insetGrouped)
         .task {
