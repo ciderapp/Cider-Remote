@@ -116,4 +116,4 @@ Join the [TestFlight beta](https://testflight.apple.com/join/qTeV2T2w) here.
 
 This project is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license. See the [LICENSE](./LICENSE) file for details.
 
-© Cider Collective 2024-2025
+© Cider Collective 2024-2026
