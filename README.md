@@ -12,7 +12,7 @@
 
 # About Remote
 
-[Cider Remote](https://cider.sh/remote) is a native iOS app, built with [SwiftUI](https://developer.apple.com/swiftui/) and [Socket.io](https://socket.io/), that gives remote controls to [Cider](https://cider.sh/).
+[Cider Remote](https://cider.sh/remote) is a native iOS app, built with [SwiftUI](https://developer.apple.com/swiftui/) and [Socket.io](https://socket.io/), that gives remote controls to [Cider](https://cider.sh/); Graciously maintained by [Lumaa](https://github.com/lumaa-dev)!
 
 > [!NOTE]
 > Cider Remote is also available on Android: [`ciderapp/Cider-Remote-RN`](https://github.com/ciderapp/Cider-Remote-RN)
