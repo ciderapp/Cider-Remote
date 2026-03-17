@@ -61,17 +61,21 @@ struct TogglePlayButtonIntent: AppIntent {
         Summary("Toggle play/pause on Cider")
     }
 
+    var device: DeviceEntity?
+
     func perform() async throws -> some IntentResult {
-        let devices: [DeviceEntity] = try await DeviceQuery().suggestedEntities()
+        guard let devices = await self.getDevices() else { return .result() }
 
         for device in devices {
             let (statusCode, _) = await device.sendRequest(endpoint: "playback/active")
 
             if statusCode == 200 {
                 (_, _) = await device.sendRequest(endpoint: "playback/playpause", method: "POST")
+
                 if #available(iOS 18.0, *) {
                     ControlCenter.shared.reloadControls(ofKind: "sh.cider.CiderRemote.PlayPauseControl")
                 }
+
                 return .result()
             } else {
                 print("[AppIntent] - No toggle \(statusCode)")
@@ -79,5 +83,13 @@ struct TogglePlayButtonIntent: AppIntent {
         }
 
         return .result()
+    }
+
+    private func getDevices() async -> [DeviceEntity]? {
+        if let device {
+            return [device]
+        } else {
+            return try? await DeviceQuery().suggestedEntities()
+        }
     }
 }

@@ -61,6 +61,7 @@ struct DeviceEntity: Identifiable, Codable, AppEntity {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.addValue(self.token, forHTTPHeaderField: "apptoken")
+        request.timeoutInterval = 3.0
 
         if let body = body {
             request.httpBody = try? JSONSerialization.data(withJSONObject: body)

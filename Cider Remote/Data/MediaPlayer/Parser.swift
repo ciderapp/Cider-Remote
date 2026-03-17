@@ -1,4 +1,4 @@
-// Made by Lumaa & ChatGPT
+// Made by Lumaa, ChatGPT & Grok
 
 import Foundation
 
@@ -9,12 +9,14 @@ class Parser: NSObject, XMLParserDelegate {
 
     private var currentText: String
     private var currentBegin: String?
+    private var currentAgent: String?
 
     init(provider: Parser.LyricProvider, lyrics: [LyricLine] = []) {
         self.provider = provider
         self.lyrics = lyrics
         self.currentText = ""
         self.currentBegin = nil
+        self.currentAgent = nil
     }
 
     func parser(_ parser: XMLParser,
@@ -24,8 +26,9 @@ class Parser: NSObject, XMLParserDelegate {
                 attributes attributeDict: [String : String] = [:])
     {
         if elementName == "p" {
-            // Save the 'begin' time (as string) when <p> starts, reset text.
+            // Save the 'begin' time and 'ttm:agent' (if present) when <p> starts, reset text.
             currentBegin = attributeDict["begin"]
+            currentAgent = attributeDict["ttm:agent"]
             currentText = ""
         }
     }
@@ -69,14 +72,18 @@ class Parser: NSObject, XMLParserDelegate {
                     timestamp = seconds + milliseconds / 1000
                 }
 
+                // Set altVoice based on ttm:agent value: "v1" -> false, "v2" -> true, default to false if not specified
+                let altVoice = currentAgent == "v2" ? true : false
 
                 let lyricLine = LyricLine(text: trimmedText,
                                           timestamp: timestamp,
-                                          isMainLyric: isMain)
+                                          isMainLyric: isMain,
+                                          altVoice: altVoice)
                 lyrics.append(lyricLine)
             }
             // Reset for next <p>
             currentBegin = nil
+            currentAgent = nil
             currentText = ""
         }
     }

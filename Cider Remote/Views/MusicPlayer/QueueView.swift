@@ -2,13 +2,15 @@
 
 import SwiftUI
 
-struct QueueView: View {
+struct QueueView<Content : View>: View {
     @Environment(\.dismiss) private var dismiss: DismissAction
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
-    @EnvironmentObject var colorPalette: ColorSchemeManager
+    let device: Device
 
-    @ObservedObject var viewModel: MusicPlayerViewModel
+    @Binding var queueItems: [Track]
+    @Binding var sourceQueue: Queue?
+    @Binding var currentTrack: Track?
 
     @State private var tappedTrack: Track? = nil
     @State private var fetchingResults: Bool = false
@@ -17,66 +19,33 @@ struct QueueView: View {
 
     @FocusState private var isSearching: Bool
 
+    var header: () -> Content
+
     var body: some View {
         ZStack {
             List {
-                if #available(iOS 26.0, *) {} else {
-                    BrowserView.access($librarySheet, background: colorPalette.primaryColor)
-                        .padding(.horizontal)
-                        .ciderRowOptimized()
+                self.header()
+                    .ciderRowOptimized()
 
-                    Divider()
-                        .overlay { Color.white }
-                        .padding(.horizontal)
-                        .ciderRowOptimized()
-                }
-
-                Section {
-                    queueView
-                        .ciderRowOptimized()
-                }
-                .ciderOptimized()
+                queueView
+                    .ciderRowOptimized()
             }
+            .contentMargins(.bottom, 20, for: .scrollContent)
+            .contentMargins(.top, 10, for: .scrollContent)
             .ciderOptimized()
-            .fullScreenCover(isPresented: $librarySheet) {
-                BrowserView(device: viewModel.device)
-            }
-            .contentMargins(.vertical, UserDevice.shared.isBeta ? 60 : 0, for: .scrollContent)
-            .overlay(alignment: .top) {
-                if #available(iOS 26.0, *) {
-                    BrowserView.access($librarySheet, background: colorPalette.primaryColor)
-                        .padding(.horizontal)
-                }
-            }
         }
         .foregroundStyle(.primary)
     }
 
     @ViewBuilder
     private var queueView: some View {
-        if viewModel.queueItems.count < 1 || (viewModel.queueItems.count == 1 && viewModel.queueItems.first == viewModel.currentTrack) {
-            if #available(iOS 17.0, *) {
-                ContentUnavailableView("Queue empty", systemImage: "list.number", description: Text("Your Cider queue is empty"))
-            } else {
-                VStack {
-                    Image(systemName: "list.number")
-                        .imageScale(.large)
-                        .font(.title2)
-                        .padding(.bottom)
-
-                    Text("Queue empty")
-                        .font(.title3)
-
-                    Text("Your Cider queue is empty")
-                        .font(.caption)
-                        .foregroundStyle(Color.gray)
-                }
-            }
+        if queueItems.count < 1 || (queueItems.count == 1 && queueItems.first?.id == currentTrack?.id) {
+            ContentUnavailableView("Queue empty", systemImage: "list.number", description: Text("Your Cider queue is empty"))
         } else {
-            ForEach(viewModel.queueItems, id: \.id) { track in
+            ForEach(queueItems, id: \.id) { track in
                 Button {
                     Task {
-                        await viewModel.playFromQueue(track)
+                        await playFromQueue(track)
                     }
                 } label: {
                     trackRow(track, showDuration: true)
@@ -84,27 +53,29 @@ struct QueueView: View {
                 }
             }
             .onDelete { set in
-                guard var sourceQueue = viewModel.sourceQueue else { return }
-                viewModel.queueItems.remove(atOffsets: set)
+                guard var sourceQueue = sourceQueue else { return }
+
+                self.queueItems.remove(atOffsets: set)
                 sourceQueue.remove(set: set)
 
-                viewModel.sourceQueue = sourceQueue
+                self.sourceQueue = sourceQueue
 
                 Task {
                     for i in set {
-                        await viewModel.removeQueue(index: i)
+                        await self.removeQueue(index: i)
                     }
                 }
             }
             .onMove { from, to in
-                guard var sourceQueue = viewModel.sourceQueue, let firstIndex = from.first else { return }
-                viewModel.queueItems.move(fromOffsets: from, toOffset: to)
+                guard var sourceQueue = sourceQueue, let firstIndex = from.first else { return }
+
+                self.queueItems.move(fromOffsets: from, toOffset: to)
                 sourceQueue.move(from: from, to: to)
 
-                viewModel.sourceQueue = sourceQueue
+                self.sourceQueue = sourceQueue
 
                 Task {
-                    await viewModel.moveQueue(from: firstIndex, to: to)
+                    await self.moveQueue(from: firstIndex, to: to)
                 }
             }
         }
@@ -145,7 +116,7 @@ struct QueueView: View {
                 Spacer()
 
 #if DEBUG
-                if let trackIndex = self.viewModel.sourceQueue?.firstIndex(of: track), trackIndex >= 0 {
+                if let trackIndex = sourceQueue?.firstIndex(of: track), trackIndex >= 0 {
                     Text("\(trackIndex)")
                         .font(.caption.bold())
                 }
@@ -165,5 +136,113 @@ struct QueueView: View {
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
-}
 
+    // MARK: - Device functions
+
+    func moveQueue(from startIndex: Int, to destinationIndex: Int) async {
+        guard let sourceQueue, startIndex != destinationIndex else { return }
+        do {
+            _ = try await device.sendRequest(endpoint: "playback/queue/move-to-position", method: "POST", body: ["startIndex" : startIndex + sourceQueue.offset, "destinationIndex": destinationIndex + sourceQueue.offset])
+            try? await Task.sleep(nanoseconds: 500_000_000) // we don't wait, then the *fetchQueueItems* will error
+            await self.fetchQueueItems()
+        } catch {
+            print(error)
+        }
+    }
+
+    func removeQueue(index: Int) async {
+        guard let sourceQueue else { return }
+        do {
+            _ = try await device.sendRequest(endpoint: "playback/queue/remove-by-index", method: "POST", body: ["index": index + sourceQueue.offset])
+        } catch {
+            print(error)
+        }
+    }
+
+    func playFromQueue(_ track: Track) async {
+        guard let sourceQueue, let index = sourceQueue.tracks.firstIndex(where: { $0.id == track.id }) else { return }
+        print("[QUEUE] play from queue")
+
+        do {
+            _ = try await device.sendRequest(endpoint: "playback/queue/change-to-index", method: "POST", body: ["index" : index + sourceQueue.offset])
+            await self.updateQueue(newTrack: track)
+        } catch {
+            print(error)
+        }
+    }
+
+    private func updateQueue(newTrack: Track) async {
+        print("[QUEUE] smart update")
+        if newTrack.id == queueItems.first?.id { // newTrack is the next playing song in the queue
+            queueItems = Array(queueItems.dropFirst())
+        } else {
+            await self.fetchQueueItems()
+        }
+    }
+
+    func fetchQueueItems() async {
+        guard let currentTrack else { print("[QUEUE] Need currentTrack to get current queue"); return }
+
+        print("Fetching current queue")
+        do {
+            let data = try await device.sendRequest(endpoint: "playback/queue")
+            if let jsonDict = data as? [[String: Any]] {
+                let attributes: [[String : Any]] = jsonDict.compactMap { $0["attributes"] as? [String : Any] }
+                let queue: [Track] = attributes.map { getTrack(using: $0) }
+
+                var queueItem: Queue = .init(tracks: queue)
+                queueItem.defineCurrent(track: currentTrack)
+
+                self.sourceQueue = queueItem // after defining offset
+                self.queueItems = queueItem.tracks
+            }
+        } catch {
+            print(error)
+        }
+    }
+
+    private func getTrack(using info: [String: Any]) -> Track {
+        // Extract ID from playParams
+        var id: String?
+        var amId: String?
+
+        if let playParams = info["playParams"] as? [String: Any] {
+            id = playParams["id"] as? String
+            amId = playParams["catalogId"] as? String
+        }
+
+        let title = info["name"] as? String ?? ""
+        let artist = info["artistName"] as? String ?? ""
+        let album = info["albumName"] as? String ?? ""
+        let duration = info["durationInMillis"] as? Double ?? 0
+
+        if let artwork = info["artwork"] as? [String: Any],
+           var artworkUrl = artwork["url"] as? String {
+            // Replace placeholders in artwork URL
+            artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
+            artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
+
+            let data: Data? = nil
+
+            return Track(id: id ?? "",
+                         catalogId: amId ?? "",
+                         title: title,
+                         artist: artist,
+                         album: album,
+                         artwork: artworkUrl,
+                         duration: duration / 1000,
+                         artworkData: data ?? Data()
+            )
+        } else {
+            return Track(id: id ?? "",
+                         catalogId: amId ?? "",
+                         title: title,
+                         artist: artist,
+                         album: album,
+                         artwork: "",
+                         duration: duration / 1000,
+                         artworkData: Data()
+            )
+        }
+    }
+}

@@ -17,23 +17,31 @@ class DeviceManager: ObservableObject {
     }
 
     func add(_ device: Device) {
-        self.devices.append(device)
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.append(device)
+            self.saveDevices()
+        }
     }
 
     func set(_ device: Device, at: Int) {
-        self.devices[at] = device
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices[at] = device
+            self.saveDevices()
+        }
     }
 
     func remove(_ device: Device) {
-        self.devices.removeAll { $0.id == device.id }
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.removeAll { $0.id == device.id }
+            self.saveDevices()
+        }
     }
 
     func clear() {
-        self.devices.removeAll()
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.removeAll()
+            self.saveDevices()
+        }
     }
 
     func checkDeviceActivity(_ device: Device) async {
