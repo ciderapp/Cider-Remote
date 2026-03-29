@@ -501,6 +501,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cider-Remote-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Remote;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "This app accesses your Apple Music library to detect currently playing music and send it to Cider for remote playback.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan QR codes.";
@@ -543,6 +544,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cider-Remote-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Remote;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "This app accesses your Apple Music library to detect currently playing music and send it to Cider for remote playback.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan QR codes.";
