@@ -283,9 +283,11 @@ struct Changelog: Hashable, Identifiable {
 extension Changelog {
     /// Remote 4.0.0
     static var v400: Changelog {
-        var temp = Changelog(version: "4.0.0", authors: ["Lumaa", "Deadfrost"], commits: "main...v4")
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa", "Deadfrost"], commits: "41dc79a...v4")
         temp = temp
             .setChanges(additions: [
+				"Compatibility with Cider 4.x",
+				"Cross-compatibility with previous versions of Cider",
                 "Cider Collective team in the contributors screen",
                 "Animated album covers",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
@@ -297,7 +299,7 @@ extension Changelog {
                 "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
                 "Slowly moving color gradient in the background",
                 "Swipe a Cider device to the left to send your iPhone's/iPad's playing song to Cider",
-                "New \"Cider Remote\" title integrated in the screen's top bar",
+                "New \"Cider Remote\" title integrated in the screen's top bar"
             ], modifications: [
                 "Temporary?: iOS 26+ only",
                 "The \"Cider Devices\" title has been replaced with \"Cider Remote\"",
