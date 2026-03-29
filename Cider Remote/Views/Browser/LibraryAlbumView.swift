@@ -281,7 +281,8 @@ extension UIImage: @retroactive Identifiable {
 extension LibraryAlbumView {
     func playHref(href: String) async {
         do {
-            _ = try await device.sendRequest(endpoint: "playback/play-item-href", method: "POST", body: ["href": href])
+			let path: String = device.useV2 ? "playback/play-href" : "playback/play-item-href"
+			_ = try await device.sendRequest(endpoint: path, method: "POST", body: ["href": href])
         } catch {
             print("Error playing track: \(error)")
         }
@@ -289,7 +290,10 @@ extension LibraryAlbumView {
 
     func clearQueue() async {
         do {
-            _ = try await device.sendRequest(endpoint: "playback/queue/clear-queue", method: "POST")
+			let path: String = device.useV2 ? "queue" : "playback/queue/clear-queue"
+			let method: String = device.useV2 ? "DELETE" : "POST"
+
+			_ = try await device.sendRequest(endpoint: path, method: method)
         } catch {
             print("Error clearing queue: \(error)")
         }
@@ -306,7 +310,8 @@ extension LibraryAlbumView {
     func playLater(from playingTrack: LibraryTrack)  {
         Task {
             do {
-                let _ = try await device.sendRequest(endpoint: "playback/play-later", method: "POST", body: ["id": playingTrack.id, "type": "song"])
+				let path: String = device.useV2 ? "playback/add-later" : "playback/play-later"
+				let _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["id": playingTrack.id, "type": "song"])
             } catch {
                 print("Error playing next: \(error)")
             }
@@ -316,7 +321,8 @@ extension LibraryAlbumView {
     func playNext(from playingTrack: LibraryTrack)  {
         Task {
             do {
-                let _ = try await device.sendRequest(endpoint: "playback/play-next", method: "POST", body: ["id": playingTrack.id, "type": "song"])
+				let path: String = device.useV2 ? "playback/add-next" : "playback/play-next"
+                let _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["id": playingTrack.id, "type": "song"])
             } catch {
                 print("Error playing next: \(error)")
             }

@@ -185,7 +185,7 @@ struct FriendlyNamePromptView: View {
             version: connectionInfo.initialData.version,
             platform: connectionInfo.initialData.platform,
             backend: connectionInfo.initialData.platform, // Using platform as backend for now
-            connectionMethod: connectionInfo.method.rawValue,
+            connectionMethod: connectionInfo.method,
             isActive: false,
             os: connectionInfo.initialData.os
         )
@@ -356,17 +356,17 @@ struct DeviceIconView: View {
     }
 
     var deviceImage: Image {
-        let osType = device.os ?? device.platform
+		let osType = device.os
 
-        switch osType.lowercased() {
-        case "win32":
-            return Image("Windows")
-        case "darwin":
-            return Image("macOS")
-        case "linux":
-            return Image("Linux")
-        default:
-            return Image(systemName: "desktopcomputer")
+        switch osType {
+			case .windows:
+				return Image("Windows")
+			case .macos:
+				return Image("macOS")
+			case .linux:
+				return Image("Linux")
+			default:
+				return Image(systemName: "desktopcomputer")
         }
     }
 }

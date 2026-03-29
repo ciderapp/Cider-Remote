@@ -142,7 +142,8 @@ struct QueueView<Content : View>: View {
     func moveQueue(from startIndex: Int, to destinationIndex: Int) async {
         guard let sourceQueue, startIndex != destinationIndex else { return }
         do {
-            _ = try await device.sendRequest(endpoint: "playback/queue/move-to-position", method: "POST", body: ["startIndex" : startIndex + sourceQueue.offset, "destinationIndex": destinationIndex + sourceQueue.offset])
+			let path: String = device.useV2 ? "queue/move" : "playback/queue/move-to-position"
+            _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["startIndex" : startIndex + sourceQueue.offset, "destinationIndex": destinationIndex + sourceQueue.offset])
             try? await Task.sleep(nanoseconds: 500_000_000) // we don't wait, then the *fetchQueueItems* will error
             await self.fetchQueueItems()
         } catch {
@@ -153,7 +154,8 @@ struct QueueView<Content : View>: View {
     func removeQueue(index: Int) async {
         guard let sourceQueue else { return }
         do {
-            _ = try await device.sendRequest(endpoint: "playback/queue/remove-by-index", method: "POST", body: ["index": index + sourceQueue.offset])
+			let path: String = device.useV2 ? "queue/items/\(index + sourceQueue.offset)" : "playback/queue/remove-by-index"
+            _ = try await device.sendRequest(endpoint: "playback/queue/remove-by-index", method: "POST", body: ["index": index + sourceQueue.offset]) // body unused in v2
         } catch {
             print(error)
         }
@@ -164,7 +166,8 @@ struct QueueView<Content : View>: View {
         print("[QUEUE] play from queue")
 
         do {
-            _ = try await device.sendRequest(endpoint: "playback/queue/change-to-index", method: "POST", body: ["index" : index + sourceQueue.offset])
+			let path: String = device.useV2 ? "queue/jump" : "playback/queue/change-to-index"
+            _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["index" : index + sourceQueue.offset])
             await self.updateQueue(newTrack: track)
         } catch {
             print(error)
@@ -185,7 +188,8 @@ struct QueueView<Content : View>: View {
 
         print("Fetching current queue")
         do {
-            let data = try await device.sendRequest(endpoint: "playback/queue")
+			let path: String = device.useV2 ? "queue" : "playback/queue"
+            let data = try await device.sendRequest(endpoint: path)
             if let jsonDict = data as? [[String: Any]] {
                 let attributes: [[String : Any]] = jsonDict.compactMap { $0["attributes"] as? [String : Any] }
                 let queue: [Track] = attributes.map { getTrack(using: $0) }

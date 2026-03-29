@@ -313,18 +313,22 @@ class CurrentMusicService: ObservableObject {
             let songHref = "/v1/catalog/in/songs/\(songId)"
             
             // Clear the current queue to ensure our song plays
+			let apath: String = device.useV2 ? "queue" : "playback/queue/clear-queue"
+			let method: String = device.useV2 ? "DELETE" : "POST"
+
             do {
                 _ = try await device.sendRequest(
-                    endpoint: "playback/queue/clear-queue",
-                    method: "POST"
+                    endpoint: apath,
+                    method: method
                 )
             } catch {
                 // Continue anyway if queue clear fails
             }
             
             // Use play-item-href to start the new song
+			let bpath: String = device.useV2 ? "playback/play-href" : "playback/play-item-href"
             _ = try await device.sendRequest(
-                endpoint: "playback/play-item-href",
+                endpoint: bpath,
                 method: "POST",
                 body: ["href": songHref]
             )

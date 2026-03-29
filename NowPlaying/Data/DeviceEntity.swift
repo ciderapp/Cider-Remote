@@ -35,7 +35,7 @@ struct DeviceEntity: Identifiable, Codable, AppEntity {
         self.name = device.friendlyName
         self.token = device.token
         self.host = device.host
-        self.connectionMethod = device.connectionMethod
+		self.connectionMethod = device.connectionMethod.rawValue
         self.isActive = device.isActive
         self.isPlaying = false
     }

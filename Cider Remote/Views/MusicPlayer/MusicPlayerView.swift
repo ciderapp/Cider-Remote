@@ -637,10 +637,8 @@ struct MusicPlayerView: View {
 
     func startListening() {
         print("Attempting to connect to socket")
-        let socketURL = device.connectionMethod == "tunnel"
-        ? "https://\(device.host)"
-        : "http://\(device.host):10767"
-        manager = SocketManager(socketURL: URL(string: socketURL)!, config: [.log(false), .compress])
+		let socketURL = device.connectionMethod == .tunnel ? "https://\(device.host)" : "http://\(device.host):10767"
+        manager = SocketManager(socketURL: URL(string: socketURL)!, config: [.log(true), .compress])
         socket = manager?.defaultSocket
 
         setupSocketEventHandlers()
@@ -666,8 +664,9 @@ struct MusicPlayerView: View {
         }
 
         socket?.on("API:Playback") { data, ack in
-            guard let playbackData = data[0] as? [String: Any],
-                  let type = playbackData["type"] as? String else {
+			print("API PLAYBACK: \(data)")
+
+            guard let playbackData = data[0] as? [String: Any], let type = playbackData["type"] as? String else {
                 print("Invalid playback data received")
                 return
             }
@@ -743,7 +742,8 @@ struct MusicPlayerView: View {
 
         print("Fetching current queue")
         do {
-            let data = try await sendRequest(endpoint: "playback/queue")
+			let path: String = device.useV2 ? "queue" : "playback/queue"
+            let data = try await sendRequest(endpoint: path)
             if let jsonDict = data as? [[String: Any]] {
                 let attributes: [[String : Any]] = jsonDict.compactMap { $0["attributes"] as? [String : Any] }
                 let queue: [Track] = attributes.map { getTrack(using: $0) }
@@ -791,10 +791,11 @@ struct MusicPlayerView: View {
         print("Fetching current track")
         do {
             let data = try await sendRequest(endpoint: "playback/now-playing", method: "GET")
-            if let jsonDict = data as? [String: Any],
-               let info = jsonDict["info"] as? [String: Any] {
+			if let info = data as? [String: Any], device.useV2 {
                 updateTrackInfo(info, alt: true)
-            } else {
+			} else if let jsonDict = data as? [String: Any], let info = jsonDict["info"] as? [String: Any], !device.useV2  {
+				updateTrackInfo(info, alt: true)
+			} else {
                 throw NetworkError.decodingError
             }
         } catch {
@@ -1009,7 +1010,8 @@ struct MusicPlayerView: View {
     func getCurrentVolume() async {
         print("Fetching current volume")
         do {
-            let data = try await sendRequest(endpoint: "playback/volume", method: "GET")
+			let path: String = device.useV2 ? "audio/volume" : "playback/volume"
+            let data = try await sendRequest(endpoint: path, method: "GET")
             if let jsonDict = data as? [String: Any],
                let volume = jsonDict["volume"] as? Double {
                 self.volume = volume
@@ -1053,7 +1055,8 @@ struct MusicPlayerView: View {
 
     func getRepeat() async {
         do {
-            let result = try await sendRequest(endpoint: "playback/repeat-mode", method: "GET")
+			let path: String = device.useV2 ? "playback/repeat" : "playback/repeat-mode"
+            let result = try await sendRequest(endpoint: path, method: "GET")
             if let data = result as? [String: Any] {
                 let val: Int = data["value"] as? Int ?? 0
                 self.repeatMode = .init(rawValue: val) ?? .none
@@ -1065,7 +1068,8 @@ struct MusicPlayerView: View {
 
     func getShuffle() async {
         do {
-            let result = try await sendRequest(endpoint: "playback/shuffle-mode", method: "GET")
+			let path: String = device.useV2 ? "playback/shuffle" : "playback/shuffle-mode"
+            let result = try await sendRequest(endpoint: path, method: "GET")
             if let data = result as? [String: Any] {
                 let val: Int = data["value"] as? Int ?? 0
                 self.shuffleMode = .init(rawValue: val) ?? .none
@@ -1092,7 +1096,8 @@ struct MusicPlayerView: View {
             isPlaying.toggle() // Immediately update UI
         }
         do {
-            _ = try await sendRequest(endpoint: "playback/playpause", method: "POST")
+			let path: String = device.useV2 ? "playback/toggle" : "playback/playpause"
+            _ = try await sendRequest(endpoint: path, method: "POST")
             // Server confirmed the change, no need to update UI again
             if #available(iOS 18.0, *) {
                 ControlCenter.shared.reloadControls(ofKind: "sh.cider.CiderRemote.PlayPauseControl")
@@ -1111,7 +1116,8 @@ struct MusicPlayerView: View {
             self.repeatMode = .init(rawValue: self.repeatMode.rawValue + 1) ?? .none
         }
         do {
-            _ = try await sendRequest(endpoint: "playback/toggle-repeat", method: "POST")
+			let path: String = device.useV2 ? "playback/repeat/toggle" : "playback/toggle-repeat"
+            _ = try await sendRequest(endpoint: path, method: "POST")
         } catch {
             self.repeatMode = lastRepeat
             handleError(error)
@@ -1125,7 +1131,8 @@ struct MusicPlayerView: View {
             self.shuffleMode = .init(rawValue: self.shuffleMode.rawValue + 1) ?? .none
         }
         do {
-            _ = try await sendRequest(endpoint: "playback/toggle-shuffle", method: "POST")
+			let path: String = device.useV2 ? "playback/shuffle/toggle" : "playback/toggle-shuffle"
+            _ = try await sendRequest(endpoint: path, method: "POST")
         } catch {
             self.shuffleMode = lastShuffle
             handleError(error)
@@ -1138,7 +1145,8 @@ struct MusicPlayerView: View {
             self.isAutoPlaying.toggle() // Immediately update UI
         }
         do {
-            _ = try await sendRequest(endpoint: "playback/toggle-autoplay", method: "POST")
+			let path: String = device.useV2 ? "playback/autoplay/toggle" : "playback/toggle-autoplay"
+            _ = try await sendRequest(endpoint: path, method: "POST")
         } catch {
             isAutoPlaying.toggle()
             handleError(error)
@@ -1149,7 +1157,8 @@ struct MusicPlayerView: View {
         let newRating = isLiked ? 0 : 1
         print("Toggling like status to: \(newRating)")
         do {
-            _ = try await sendRequest(endpoint: "playback/set-rating", method: "POST", body: ["rating": newRating])
+			let path: String = device.useV2 ? "library/now-playing/rating" : "playback/set-rating"
+            _ = try await sendRequest(endpoint: path, method: "POST", body: ["rating": newRating])
             isLiked.toggle()
 
             withAnimation {
@@ -1167,7 +1176,8 @@ struct MusicPlayerView: View {
         if !isInLibrary {
             print("Adding to library")
             do {
-                _ = try await sendRequest(endpoint: "playback/add-to-library", method: "POST")
+				let path: String = device.useV2 ? "library/now-playing/add" : "playback/add-to-library"
+                _ = try await sendRequest(endpoint: path, method: "POST")
                 isInLibrary = true
 
                 withAnimation {
@@ -1185,7 +1195,10 @@ struct MusicPlayerView: View {
     private func adjustVolume(to volume: Double) async {
         print("Adjusting volume to: \(volume)")
         do {
-            let data = try await sendRequest(endpoint: "playback/volume", method: "POST", body: ["volume": volume])
+			let path: String = device.useV2 ? "audio/volume" : "playback/volume"
+			let method: String = device.useV2 ? "PATCH" : "POST"
+
+            let data = try await sendRequest(endpoint: path, method: method, body: ["volume": volume])
             if let jsonDict = data as? [String: Any],
                let newVolume = jsonDict["volume"] as? Double {
                 self.volume = newVolume
@@ -1248,7 +1261,8 @@ struct MusicPlayerView: View {
         print("Playing song using HREF")
 
         do {
-            _ = try await sendRequest(endpoint: "playback/play-item-href", method: "POST", body: ["href": href])
+			let path: String = device.useV2 ? "playback/play-href" : "playback/play-item-href"
+            _ = try await sendRequest(endpoint: path, method: "POST", body: ["href": href])
         } catch {
             handleError(error)
         }
@@ -1259,7 +1273,8 @@ struct MusicPlayerView: View {
         print("Playing TRACK song using HREF")
 
         do {
-            _ = try await sendRequest(endpoint: "playback/play-item-href", method: "POST", body: ["href": href])
+			let path: String = device.useV2 ? "playback/play-href" : "playback/play-item-href"
+			_ = try await sendRequest(endpoint: path, method: "POST", body: ["href": href])
         } catch {
             handleError(error)
         }
@@ -1299,11 +1314,12 @@ struct MusicPlayerView: View {
         return await self.loadImage(for: url)
     }
 
-    private func sendRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil) async throws -> Any {
-        let baseURL = device.connectionMethod == "tunnel"
-        ? "https://\(device.host)"
-        : "http://\(device.host):10767"
-        guard let url = URL(string: "\(baseURL)/api/v1/\(endpoint)") else {
+	private func sendRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, version: String? = nil) async throws -> Any {
+		let clientVersion: String = self.device.useV2 ? "v2" : "v1"
+		let v: String = version ?? clientVersion
+
+		let baseURL = device.connectionMethod == .tunnel ? "https://\(device.host)" : "http://\(device.host):10767"
+        guard let url = URL(string: "\(baseURL)/api/\(v)/\(endpoint)") else {
             throw NetworkError.invalidURL
         }
 
@@ -1332,14 +1348,20 @@ struct MusicPlayerView: View {
             throw NetworkError.serverError("Server responded with status code \(httpResponse.statusCode)")
         }
 
-        do {
-            let json = try JSONSerialization.jsonObject(with: data, options: [])
-            //            print("Received data: \(json)")
-            return json
-        } catch {
-            print(error)
-            throw NetworkError.decodingError
-        }
+		do {
+			let json = try JSONSerialization.jsonObject(with: data, options: [])
+			if self.device.useV2 {
+				let jsonData = (json as! [String: Any])["data"]!
+				print(jsonData)
+				return jsonData
+			} else {
+//                print("Received data: \(json)")
+				return json
+			}
+		} catch {
+			print(error)
+			throw NetworkError.decodingError
+		}
     }
 
     private func handleError(_ error: Error) {
