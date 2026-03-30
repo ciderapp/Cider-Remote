@@ -32,15 +32,23 @@ struct AddDeviceView: View {
                 }
             }
         } label: {
-            Label("Add New Cider Device", systemImage: "plus.circle")
+            Label("Add New Cider Device", systemImage: "plus")
+                .foregroundStyle(Color.cider)
         }
         .sheet(isPresented: $isShowingScanner) {
 #if targetEnvironment(simulator)
             VStack {
                 Text(String("Enter the JSON below:"))
-                TextField(String("{\"address\":\"123.456.7.89\",\"token\":\"abcdefghijklmnopqrstuvwx\",\"method\":\"lan\",\"initialData\":{\"version\":\"2.0.3\",\"platform\":\"genten\",\"os\":\"darwin\"}}"), text: $jsonTxt)
+                TextField(String("{\"address\":\"123.456.7.89\",\"token\":\"abcdefghijklmnopqrstuvwx\",\"method\":\"lan\",\"initialData\":{\"version\":\"4.0.0\",\"platform\":\"genten\",\"os\":\"darwin\"}}"), text: $jsonTxt)
                     .padding()
                     .textFieldStyle(.roundedBorder)
+
+                Button {
+                    self.jsonTxt = "{\"address\":\"\",\"token\":\"\",\"method\":\"lan\",\"initialData\":{\"version\":\"4.0.0\",\"platform\":\"genten\",\"os\":\"darwin\"}}"
+                } label: {
+                    Text(String("Sample Data (add token & address)"))
+                }
+                .buttonStyle(.bordered)
 
                 Button {
                     fetchAction(jsonTxt)
@@ -53,24 +61,6 @@ struct AddDeviceView: View {
 #else
             if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
                 QRScannerView(scannedCode: $scannedCode)
-                    .overlay(alignment: .top) {
-                        if #available(iOS 26.0, *) {
-                            Text("Scan the Remote QR code")
-                                .font(.caption)
-                                .padding(.horizontal)
-                                .padding(.vertical, 7.5)
-                                .glassEffect()
-                                .padding(.top, 22.5)
-                        } else {
-                            Text("Scan the Remote QR code")
-                                .font(.caption)
-                                .padding(.horizontal)
-                                .padding(.vertical, 7.5)
-                                .background(Material.thin)
-                                .clipShape(.rect(cornerRadius: 15.5))
-                                .padding(.top, 22.5)
-                        }
-                    }
             } else {
                 Text("Cider Remote cannot access the camera")
                     .font(.title2.bold())
@@ -162,7 +152,10 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
         // Create a backdrop view
         var backdropView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         if #available(iOS 26.0, *) {
-            backdropView = UIVisualEffectView(effect: UIGlassEffect())
+            let glass: UIGlassEffect = UIGlassEffect(style: .regular)
+            glass.isInteractive = true
+
+            backdropView = UIVisualEffectView(effect: glass)
         }
 
         backdropView.layer.cornerRadius = closeButtonSize / 2
@@ -211,7 +204,8 @@ class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsD
 
     private func startRunning() {
         DispatchQueue.global(qos: .background).async { [weak self] in
-            self?.captureSession.startRunning()
+            guard let self else { return }
+            self.captureSession.startRunning()
         }
     }
 

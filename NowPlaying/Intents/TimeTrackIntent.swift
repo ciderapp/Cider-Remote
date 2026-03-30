@@ -28,7 +28,9 @@ struct TimeTrackIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        let (statusCode, _) = await device.sendRequest(endpoint: "playback/active")
+//		let path: String = device.useV2 ? "playback/state" : "playback/active"
+//        let (statusCode, _) = await device.sendRequest(endpoint: path)
+		let (statusCode, _) = await device.sendRequest(endpoint: "playback/active")
 
         if statusCode == 200 {
             var req: String = "playback/unknown"

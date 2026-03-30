@@ -7,16 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B913FE682E17108A005A4680 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = B913FE672E171089005A4680 /* AppIcon.icon */; };
-		B99C7C292DBD96E400B6CD36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9D289282CC51497008543A7 /* Assets.xcassets */; };
 		B9A455622CC51C19006AEB89 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = B9A455612CC51C19006AEB89 /* SocketIO */; };
 		B9CDA83D2CC686AA00FBF580 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83C2CC686AA00FBF580 /* WidgetKit.framework */; };
 		B9CDA83F2CC686AA00FBF580 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83E2CC686AA00FBF580 /* SwiftUI.framework */; };
 		B9CDA84C2CC686AC00FBF580 /* NowPlayingExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B9CDA87B2CC6905C00FBF580 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = B9CDA87A2CC6905C00FBF580 /* SocketIO */; };
-		B9CDA87D2CC69A7300FBF580 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CDA87C2CC69A7300FBF580 /* AppDelegate.swift */; };
-		B9D2892E2CC51497008543A7 /* Cider_RemoteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D2892A2CC51497008543A7 /* Cider_RemoteApp.swift */; };
-		B9D289322CC51497008543A7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9D289282CC51497008543A7 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,19 +49,24 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		B913FE672E171089005A4680 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		B9BCCEBD2DE2F6F100B003F8 /* NowPlayingExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NowPlayingExtension.entitlements; sourceTree = "<group>"; };
 		B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NowPlayingExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9CDA83C2CC686AA00FBF580 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B9CDA83E2CC686AA00FBF580 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		B9CDA87C2CC69A7300FBF580 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		B9D289282CC51497008543A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B9D289292CC51497008543A7 /* Cider Remote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Cider Remote.entitlements"; sourceTree = "<group>"; };
-		B9D2892A2CC51497008543A7 /* Cider_RemoteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cider_RemoteApp.swift; sourceTree = "<group>"; };
 		FA14E3472C7CA1C200904A49 /* Cider Remote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cider Remote.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B998C1862EA2B54500FF1517 /* Exceptions for "Cider Remote" folder in "NowPlayingExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppDelegate.swift,
+				AppIcon.icon,
+				Cider_RemoteApp.swift,
+				"Preview Content/Preview Assets.xcassets",
+			);
+			target = B9CDA8392CC686AA00FBF580 /* NowPlayingExtension */;
+		};
 		B9E7DA032D0125E800840996 /* Exceptions for "NowPlaying" folder in "Cider Remote" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -91,9 +91,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		B99015492D46931300D4CE93 /* Preview Content */ = {
+		B998C12B2EA2B54500FF1517 /* Cider Remote */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Preview Content";
+			exceptions = (
+				B998C1862EA2B54500FF1517 /* Exceptions for "Cider Remote" folder in "NowPlayingExtension" target */,
+			);
+			path = "Cider Remote";
 			sourceTree = "<group>";
 		};
 		B9E7D9FC2D0125E800840996 /* NowPlaying */ = {
@@ -103,21 +106,6 @@
 				B9E7DA042D0125E800840996 /* Exceptions for "NowPlaying" folder in "NowPlayingExtension" target */,
 			);
 			path = NowPlaying;
-			sourceTree = "<group>";
-		};
-		B9E7DA0A2D0125F100840996 /* Views */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Views;
-			sourceTree = "<group>";
-		};
-		B9E7DA182D0125F500840996 /* Components */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Components;
-			sourceTree = "<group>";
-		};
-		B9E7DA2F2D01260000840996 /* Data */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -153,27 +141,11 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B9D2892D2CC51497008543A7 /* Cider Remote */ = {
-			isa = PBXGroup;
-			children = (
-				B99015492D46931300D4CE93 /* Preview Content */,
-				B9D289292CC51497008543A7 /* Cider Remote.entitlements */,
-				B9D2892A2CC51497008543A7 /* Cider_RemoteApp.swift */,
-				B9CDA87C2CC69A7300FBF580 /* AppDelegate.swift */,
-				B9E7DA182D0125F500840996 /* Components */,
-				B9E7DA0A2D0125F100840996 /* Views */,
-				B9E7DA2F2D01260000840996 /* Data */,
-				B913FE672E171089005A4680 /* AppIcon.icon */,
-				B9D289282CC51497008543A7 /* Assets.xcassets */,
-			);
-			path = "Cider Remote";
-			sourceTree = "<group>";
-		};
 		FA14E33E2C7CA1C200904A49 = {
 			isa = PBXGroup;
 			children = (
 				B9BCCEBD2DE2F6F100B003F8 /* NowPlayingExtension.entitlements */,
-				B9D2892D2CC51497008543A7 /* Cider Remote */,
+				B998C12B2EA2B54500FF1517 /* Cider Remote */,
 				B9E7D9FC2D0125E800840996 /* NowPlaying */,
 				B9CDA83B2CC686AA00FBF580 /* Frameworks */,
 				FA14E3482C7CA1C200904A49 /* Products */,
@@ -205,10 +177,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				B998C12B2EA2B54500FF1517 /* Cider Remote */,
 				B9E7D9FC2D0125E800840996 /* NowPlaying */,
-				B9E7DA0A2D0125F100840996 /* Views */,
-				B9E7DA182D0125F500840996 /* Components */,
-				B9E7DA2F2D01260000840996 /* Data */,
 			);
 			name = NowPlayingExtension;
 			packageProductDependencies = (
@@ -234,10 +204,7 @@
 				B9CDA84B2CC686AC00FBF580 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				B99015492D46931300D4CE93 /* Preview Content */,
-				B9E7DA0A2D0125F100840996 /* Views */,
-				B9E7DA182D0125F500840996 /* Components */,
-				B9E7DA2F2D01260000840996 /* Data */,
+				B998C12B2EA2B54500FF1517 /* Cider Remote */,
 			);
 			name = "Cider Remote";
 			packageProductDependencies = (
@@ -294,7 +261,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B99C7C292DBD96E400B6CD36 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,8 +268,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B913FE682E17108A005A4680 /* AppIcon.icon in Resources */,
-				B9D289322CC51497008543A7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,8 +285,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9D2892E2CC51497008543A7 /* Cider_RemoteApp.swift in Sources */,
-				B9CDA87D2CC69A7300FBF580 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,7 +304,6 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = NowPlayingExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -352,13 +313,13 @@
 				INFOPLIST_KEY_CFBundleDisplayName = NowPlaying;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote.NowPlaying";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -378,7 +339,6 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = NowPlayingExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -388,13 +348,13 @@
 				INFOPLIST_KEY_CFBundleDisplayName = NowPlaying;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote.NowPlaying";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -541,21 +501,24 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cider-Remote-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Remote;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "This app accesses your Apple Music library to detect currently playing music and send it to Cider for remote playback.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan QR codes.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We need to access your local network to access Cider clients.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cider Remote can add artworks to your photo library.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -581,21 +544,24 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cider-Remote-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Remote;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "This app accesses your Apple Music library to detect currently playing music and send it to Cider for remote playback.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan QR codes.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We need to access your local network to access Cider clients.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cider Remote can add artworks to your photo library.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "sh.cidercollective.Cider-Remote";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -17,23 +17,31 @@ class DeviceManager: ObservableObject {
     }
 
     func add(_ device: Device) {
-        self.devices.append(device)
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.append(device)
+            self.saveDevices()
+        }
     }
 
     func set(_ device: Device, at: Int) {
-        self.devices[at] = device
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices[at] = device
+            self.saveDevices()
+        }
     }
 
     func remove(_ device: Device) {
-        self.devices.removeAll { $0.id == device.id }
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.removeAll { $0.id == device.id }
+            self.saveDevices()
+        }
     }
 
     func clear() {
-        self.devices.removeAll()
-        self.saveDevices()
+        DispatchQueue.main.async {
+            self.devices.removeAll()
+            self.saveDevices()
+        }
     }
 
     func checkDeviceActivity(_ device: Device) async {
@@ -47,10 +55,9 @@ class DeviceManager: ObservableObject {
             }
         }
 
-        guard let url = URL(string: "\(device.fullAddress)/api/v1/playback/active") else {
-            print("Invalid URL for device: \(device.friendlyName)")
-            return
-        }
+		let v2: Bool = CiderClient(device: device).useV2
+		var url: URL? = v2 ? URL(string: "\(device.fullAddress)/api/v2/client/info") : URL(string: "\(device.fullAddress)/api/v1/playback/active")
+		guard let url else { print("[DeviceManager+checkDeviceActivity] Couldn't fetch device version and/or API path (\(device.friendlyName)"); return }
 
         var request = URLRequest(url: url)
         request.addValue(device.token, forHTTPHeaderField: "apptoken")

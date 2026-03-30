@@ -8,8 +8,11 @@ struct LibraryPlaylistView: View {
     @State var playlist: LibraryPlaylist
 
     @State private var isLoading: Bool = true
+
     @State private var sharingTrack: LibraryTrack? = nil
     @State private var sharingImage: UIImage? = nil
+
+    @State private var viewingAlbum: LibraryAlbum? = nil
 
     init(_ playlist: LibraryPlaylist) {
         self.playlist = playlist
@@ -73,8 +76,19 @@ struct LibraryPlaylistView: View {
                                 } label: {
                                     Label("Play Later", image: "PlayLater")
                                 }
+
+                                Divider()
+
+                                Button {
+                                    Task {
+                                        self.viewingAlbum = await self.getAlbum(of: track)
+                                    }
+                                } label: {
+                                    Label("View Album", image: "BoxNote")
+                                }
                             } label: {
                                 Image(systemName: "ellipsis")
+                                    .padding(7.0)
                             }
                             .disabled(track.catalogId == "[UNKNOWN]")
                             .tint(Color(uiColor: UIColor.label))
@@ -89,6 +103,10 @@ struct LibraryPlaylistView: View {
         }
         .navigationTitle(Text(self.playlist.name))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $viewingAlbum) { album in
+            LibraryAlbumView(album)
+                .environmentObject(device)
+        }
         .task {
             defer { self.isLoading = false }
             self.playlist.tracks = await self.getTracks(from: self.playlist)
@@ -127,10 +145,24 @@ struct LibraryPlaylistView: View {
                               let image = UIImage(data: data) else {
                             return
                         }
+
+                        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                    }
+                } label: {
+                    Label("Save artwork", systemImage: "photo.badge.plus")
+                }
+
+                Button {
+                    Task {
+                        guard let url = URL(string: self.playlist.artwork),
+                              let (data, _) = try? await URLSession.shared.data(from: url),
+                              let image = UIImage(data: data) else {
+                            return
+                        }
                         self.sharingImage = image
                     }
                 } label: {
-                    Label("Share image", systemImage: "square.and.arrow.up")
+                    Label("Share artwork", systemImage: "square.and.arrow.up")
                 }
             }
             .sheet(item: Binding<UIImage?>(
@@ -151,49 +183,55 @@ struct LibraryPlaylistView: View {
 }
 
 extension LibraryPlaylistView {
-    func playHref(href: String) async {
-        do {
-            _ = try await device.sendRequest(endpoint: "playback/play-item-href", method: "POST", body: ["href": href])
-        } catch {
-            print("Error playing track: \(error)")
-        }
-    }
+	func playHref(href: String) async {
+		do {
+			let path: String = device.useV2 ? "playback/play-href" : "playback/play-item-href"
+			_ = try await device.sendRequest(endpoint: path, method: "POST", body: ["href": href])
+		} catch {
+			print("Error playing track: \(error)")
+		}
+	}
 
-    func clearQueue() async {
-        do {
-            _ = try await device.sendRequest(endpoint: "playback/queue/clear-queue", method: "POST")
-        } catch {
-            print("Error clearing queue: \(error)")
-        }
-    }
+	func clearQueue() async {
+		do {
+			let path: String = device.useV2 ? "queue" : "playback/queue/clear-queue"
+			let method: String = device.useV2 ? "DELETE" : "POST"
 
-    func skipTrack() async {
-        do {
-            _ = try await device.sendRequest(endpoint: "playback/next", method: "POST")
-        } catch {
-            print("Error playing next track: \(error)")
-        }
-    }
+			_ = try await device.sendRequest(endpoint: path, method: method)
+		} catch {
+			print("Error clearing queue: \(error)")
+		}
+	}
 
-    func playLater(from playingTrack: LibraryTrack)  {
-        Task {
-            do {
-                let _ = try await device.sendRequest(endpoint: "playback/play-later", method: "POST", body: ["id": playingTrack.id, "type": "song"])
-            } catch {
-                print("Error playing next: \(error)")
-            }
-        }
-    }
+	func skipTrack() async {
+		do {
+			_ = try await device.sendRequest(endpoint: "playback/next", method: "POST")
+		} catch {
+			print("Error playing next track: \(error)")
+		}
+	}
 
-    func playNext(from playingTrack: LibraryTrack)  {
-        Task {
-            do {
-                let _ = try await device.sendRequest(endpoint: "playback/play-next", method: "POST", body: ["id": playingTrack.id, "type": "song"])
-            } catch {
-                print("Error playing next: \(error)")
-            }
-        }
-    }
+	func playLater(from playingTrack: LibraryTrack)  {
+		Task {
+			do {
+				let path: String = device.useV2 ? "playback/add-later" : "playback/play-later"
+				let _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["id": playingTrack.id, "type": "song"])
+			} catch {
+				print("Error playing next: \(error)")
+			}
+		}
+	}
+
+	func playNext(from playingTrack: LibraryTrack)  {
+		Task {
+			do {
+				let path: String = device.useV2 ? "playback/add-next" : "playback/play-next"
+				let _ = try await device.sendRequest(endpoint: path, method: "POST", body: ["id": playingTrack.id, "type": "song"])
+			} catch {
+				print("Error playing next: \(error)")
+			}
+		}
+	}
 
     func getTracks(from playlist: LibraryPlaylist) async -> [LibraryTrack] {
         do {
@@ -212,5 +250,18 @@ extension LibraryPlaylistView {
         }
 
         return []
+    }
+
+    func getAlbum(of track: LibraryTrack) async -> LibraryAlbum? {
+        do {
+            guard let data = try await device.runAppleMusicAPI(path: "/v1/me/library/songs/\(track.id)/albums") as? [[String: Any]] else { return nil }
+            print(data)
+
+            return LibraryAlbum(data: data[0])
+        } catch {
+            print("Error getting library: \(error)")
+        }
+
+        return nil
     }
 }
