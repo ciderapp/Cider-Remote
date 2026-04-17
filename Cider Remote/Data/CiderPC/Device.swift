@@ -56,6 +56,27 @@ class Device: Identifiable, Codable, ObservableObject, Hashable {
         self.os = os
     }
 
+	init(
+		using client: CiderClient,
+		from auth: AuthRequest.Result,
+		host: String = "localhost",
+		friendlyName: String,
+		connectionMethod: ConnectionMethod = .lan,
+		isActive: Bool = true
+	) {
+		self.id = UUID()
+		self.host = host
+		self.token = auth.token
+		self.friendlyName = friendlyName
+		self.creationTime = Int(Date().timeIntervalSince1970)
+		self.version = client.version
+		self.platform = client.framework
+		self.backend = client.framework
+		self.connectionMethod = connectionMethod
+		self.isActive = isActive
+		self.os = client.platform
+	}
+
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         

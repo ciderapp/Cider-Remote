@@ -56,7 +56,7 @@ class DeviceManager: ObservableObject {
         }
 
 		let v2: Bool = CiderClient(device: device).useV2
-		var url: URL? = v2 ? URL(string: "\(device.fullAddress)/api/v2/client/info") : URL(string: "\(device.fullAddress)/api/v1/playback/active")
+		let url: URL? = v2 ? URL(string: "\(device.fullAddress)/api/v2/client/info") : URL(string: "\(device.fullAddress)/api/v1/playback/active")
 		guard let url else { print("[DeviceManager+checkDeviceActivity] Couldn't fetch device version and/or API path (\(device.friendlyName)"); return }
 
         var request = URLRequest(url: url)
@@ -90,7 +90,7 @@ class DeviceManager: ObservableObject {
             return decodedDevices
         } catch {
             print("Error decoding saved devices: \(error)")
-            UserDefaults.standard.set(nil, forKey: "savedDevices") // remove to avoid corruption
+            UserDefaults.standard.set(nil, forKey: "savedDevices") // remove devices to avoid corruption
             return []
         }
     }

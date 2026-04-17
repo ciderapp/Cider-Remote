@@ -96,8 +96,9 @@ struct DevicesView: View {
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
 
             ToolbarItem(placement: .topBarTrailing) {
-                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { json in
-                    self.fetchDevices(from: json)
+                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { connection in
+					DeviceManager.shared.connectionInfo = connection
+					AppPrompt.shared.showingPrompt = .newDevice
                 }
                 .buttonStyle(.glassProminent)
                 .tint(Color.cider)
@@ -200,25 +201,6 @@ struct DevicesView: View {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
 
         isRefreshing = false
-    }
-
-    func fetchDevices(from jsonString: String) {
-        print("Received JSON string: \(jsonString)")  // Log the received JSON string
-
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            print("Error: Unable to convert JSON string to Data")
-            AppPrompt.shared.showingPrompt = .oldDevice
-            return
-        }
-
-        do {
-            let connectionInfo = try JSONDecoder().decode(ConnectionInfo.self, from: jsonData)
-            DeviceManager.shared.connectionInfo = connectionInfo
-            AppPrompt.shared.showingPrompt = .newDevice
-        } catch {
-            print("Error decoding ConnectionInfo: \(error)")
-            AppPrompt.shared.showingPrompt = .oldDevice
-        }
     }
 
     private func finishRefreshing() {

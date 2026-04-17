@@ -9,32 +9,65 @@ struct AddDeviceView: View {
 
     @State private var jsonTxt: String = ""
 
-    var fetchAction: (String) -> Void
+	@State private var authenticating: Bool = false
+	@State private var hasError: Bool = false
+	@State private var errorItem: AuthRequest.Error? = nil
+
+	var fetchAction: (ConnectionInfo) -> Void
 
     var body: some View {
         Button {
-            let status = AVCaptureDevice.authorizationStatus(for: .video)
-            var isAuthorized = status == .authorized
+			Task {
+				do {
+					self.authenticating = true
+					let authRes: Any = try await self.sendAuth()
+					if authRes is AuthRequest.Error {
+						self.authenticating = false
+						self.errorItem = (authRes as! AuthRequest.Error)
+						self.hasError = true
+					} else if let res = authRes as? [String: Any] {
+						guard let data: Data = try? JSONSerialization.data(withJSONObject: res), let authAllow: AuthRequest.Result = try? JSONDecoder().decode(AuthRequest.Result.self, from: data) else { throw NetworkError.decodingError }
+						self.authenticating = false
 
-            if isAuthorized {
-                isShowingScanner = true
-            } else {
-                if status == .notDetermined {
-                    Task {
-                        isAuthorized = await AVCaptureDevice.requestAccess(for: .video)
+						let newInfo: ConnectionInfo = try await authAllow.getConnection()
+						return self.fetchAction(newInfo)
+					} else {
+						throw NetworkError.decodingError
+					}
+				} catch {
+					print(error)
 
-                        if isAuthorized {
-                            isShowingScanner = true
-                        }
-                    }
-                } else {
-                    AppPrompt.shared.showingPrompt = .accesCamera
-                }
-            }
+					// if we're here, it probably means that `tryAuth` didn't return an auth error, but threw an http error
+					self.authenticating = false
+					await self.useScanner()
+				}
+			}
         } label: {
-            Label("Add New Cider Device", systemImage: "plus")
-                .foregroundStyle(Color.cider)
+			if self.authenticating {
+				ProgressView()
+			} else {
+				Label("Add New Cider Device", systemImage: "plus")
+					.foregroundStyle(Color.cider)
+			}
         }
+		.disabled(self.authenticating)
+		.alert("Integration Failed", isPresented: $hasError) {
+			Button(role: .confirm) {
+				Task {
+					await self.useScanner()
+				}
+			} label: {
+				Text("Scan a QR code")
+			}
+
+			Button(role: .cancel) {}
+		} message: {
+			if let errorItem {
+				Text("Error \(errorItem.code): \(errorItem.description)")
+			} else {
+				Text("Unknown Error")
+			}
+		}
         .sheet(isPresented: $isShowingScanner) {
 #if targetEnvironment(simulator)
             VStack {
@@ -51,8 +84,10 @@ struct AddDeviceView: View {
                 .buttonStyle(.bordered)
 
                 Button {
-                    fetchAction(jsonTxt)
-                    isShowingScanner = false
+					if let fetched = self.fetchDevices(from: jsonTxt) {
+						fetchAction(fetched)
+						isShowingScanner = false
+					}
                 } label: {
                     Text(String("Fetch device"))
                 }
@@ -69,12 +104,89 @@ struct AddDeviceView: View {
 #endif
         }
         .onChange(of: scannedCode) { _, newValue in
-            if let code = newValue {
-                fetchAction(code)
+			if let code = newValue, let fetched = self.fetchDevices(from: code) {
+				fetchAction(fetched)
                 isShowingScanner = false
             }
         }
     }
+
+	private func useScanner() async {
+		let status = AVCaptureDevice.authorizationStatus(for: .video)
+		var isAuthorized = status == .authorized
+
+		if isAuthorized {
+			isShowingScanner = true
+		} else {
+			if status == .notDetermined {
+				isAuthorized = await AVCaptureDevice.requestAccess(for: .video)
+
+				if isAuthorized {
+					isShowingScanner = true
+				}
+			} else {
+				AppPrompt.shared.showingPrompt = .accesCamera
+			}
+		}
+	}
+
+	private func sendAuth(authRequest: AuthRequest = .remoteRequest) async throws -> Any {
+		guard let url = URL(string: "http://localhost:\(Int.defaultPort)/api/v2/auth/request") else {
+			throw NetworkError.invalidURL
+		}
+
+		print("Sending request to: \(url.absoluteString)")
+
+		var request = URLRequest(url: url)
+		request.httpMethod = "POST"
+
+		if let data = try? JSONEncoder().encode(authRequest), let body = try? JSONSerialization.jsonObject(with: data) {
+			request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+			print("Request body: \(body)")
+		}
+
+		let (data, response) = try await URLSession.shared.data(for: request)
+		print("Response raw: \(String(data: data, encoding: .utf8) ?? "[No data]")")
+
+		guard let httpResponse = response as? HTTPURLResponse else {
+			throw NetworkError.invalidResponse
+		}
+
+		print("Response status code: \(httpResponse.statusCode)")
+
+		guard (200...299).contains(httpResponse.statusCode) else {
+			if let authError: AuthRequest.Error = AuthRequest.Error.matchCode(with: httpResponse.statusCode) {
+				return authError
+			} else {
+				throw NetworkError.serverError("Server responded with status code \(httpResponse.statusCode)")
+			}
+		}
+
+		let json = try JSONSerialization.jsonObject(with: data, options: [])
+		let jsonData = (json as! [String: Any])["data"]!
+		print(jsonData)
+		return jsonData
+	}
+
+	func fetchDevices(from jsonString: String) -> ConnectionInfo? {
+		print("Received JSON string: \(jsonString)")  // Log the received JSON string
+
+		guard let jsonData = jsonString.data(using: .utf8) else {
+			print("Error: Unable to convert JSON string to Data")
+			AppPrompt.shared.showingPrompt = .oldDevice
+			return nil
+		}
+
+		do {
+			let connectionInfo = try JSONDecoder().decode(ConnectionInfo.self, from: jsonData)
+			return connectionInfo
+		} catch {
+			print("Error decoding ConnectionInfo: \(error)")
+			AppPrompt.shared.showingPrompt = .oldDevice
+			return nil
+		}
+	}
 }
 
 class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
