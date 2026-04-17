@@ -39,12 +39,12 @@ struct AddDeviceView: View {
 #if targetEnvironment(simulator)
             VStack {
                 Text(String("Enter the JSON below:"))
-                TextField(String("{\"address\":\"123.456.7.89\",\"token\":\"abcdefghijklmnopqrstuvwx\",\"method\":\"lan\",\"initialData\":{\"version\":\"4.0.0\",\"platform\":\"genten\",\"os\":\"darwin\"}}"), text: $jsonTxt)
+                TextField(String("{\"address\":\"123.456.7.89\",\"token\":\"abcdefghijklmnopqrstuvwx\",\"method\":\"lan\",\"initialData\":{\"version\":\"400\",\"platform\":\"genten\",\"os\":\"darwin\"}}"), text: $jsonTxt)
                     .padding()
                     .textFieldStyle(.roundedBorder)
 
                 Button {
-                    self.jsonTxt = "{\"address\":\"\",\"token\":\"\",\"method\":\"lan\",\"initialData\":{\"version\":\"4.0.0\",\"platform\":\"genten\",\"os\":\"darwin\"}}"
+                    self.jsonTxt = "{\"address\":\"\",\"token\":\"\",\"method\":\"lan\",\"initialData\":{\"version\":\"400\",\"platform\":\"genten\",\"os\":\"darwin\"}}"
                 } label: {
                     Text(String("Sample Data (add token & address)"))
                 }
