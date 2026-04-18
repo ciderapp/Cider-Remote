@@ -1,5 +1,5 @@
 // Made by Lumaa
-// For current contributors & future contributors
+// For current, past and future contributors
 
 import SwiftUI
 
