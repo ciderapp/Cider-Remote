@@ -159,6 +159,6 @@ extension AuthRequest.Result {
 
 extension URL {
 	static var remoteImage: URL? {
-		return URL(string: "https://files.lumaa.fr/api/1024x1024.png") // temp path until cider.sh includes it :pray:
+		return URL(string: "https://files.lumaa.fr/p/1024x1024.png") // temp path until cider.sh includes it :pray:
 	}
 }
