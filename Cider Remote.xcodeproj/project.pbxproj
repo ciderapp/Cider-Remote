@@ -64,7 +64,6 @@
 				AppIcon.icon,
 				Cider_RemoteApp.swift,
 				"Preview Content/Preview Assets.xcassets",
-				Views/OnboardingView.swift,
 			);
 			target = B9CDA8392CC686AA00FBF580 /* NowPlayingExtension */;
 		};

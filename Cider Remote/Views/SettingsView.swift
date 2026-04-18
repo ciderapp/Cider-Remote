@@ -79,13 +79,12 @@ struct SettingsView: View {
 				.fullScreenCover(isPresented: $onboardingScreen) { OnboardingView() }
 
                 Section(header: Text("About")) {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
-                            .foregroundStyle(.secondary)
-                    }
-                    
+					LabeledContent {
+						Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
+					} label: {
+						Text("Version")
+					}
+
                     NavigationLink {
                         ChangelogsView()
                     } label: {
@@ -97,7 +96,7 @@ struct SettingsView: View {
                     NavigationLink {
                         ContributorsView()
                     } label: {
-                        Text("© Cider Collective 2024-2025")
+                        Text("© Cider Collective 2024-2026")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
