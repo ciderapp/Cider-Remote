@@ -14,6 +14,9 @@ struct SettingsView: View {
     @AppStorage("deviceDetails") private var deviceDetails: Bool = false
     @AppStorage("refreshInterval") private var refreshInterval: Double = 10.0
 
+	// other
+	@State private var onboardingScreen: Bool = false
+
     var body: some View {
         NavigationStack {
             List {
@@ -65,6 +68,15 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+				Section {
+					Button {
+						self.onboardingScreen = true
+					} label: {
+						Text("Show Onboarding")
+					}
+				}
+				.fullScreenCover(isPresented: $onboardingScreen) { OnboardingView() }
 
                 Section(header: Text("About")) {
                     HStack {

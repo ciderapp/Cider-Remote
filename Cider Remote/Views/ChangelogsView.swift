@@ -286,9 +286,11 @@ extension Changelog {
         var temp = Changelog(version: "4.0.0", authors: ["Lumaa", "Deadfrost"], commits: "41dc79a...v4")
         temp = temp
             .setChanges(additions: [
+				"A brand new onboarding screen, showcasing Remote's best features",
 				"Compatibility with Cider 4.x",
 				"Cross-compatibility with previous versions of Cider",
                 "Cider Collective team in the contributors screen",
+				"New Cider 4.x authentication method (default)",
                 "Animated album covers",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
                 "Horizontal Layout can now have the queue enabled",
