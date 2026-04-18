@@ -35,7 +35,7 @@ struct DeviceEntity: Identifiable, Codable, AppEntity {
         self.name = device.friendlyName
         self.token = device.token
         self.host = device.host
-        self.connectionMethod = device.connectionMethod
+		self.connectionMethod = device.connectionMethod.rawValue
         self.isActive = device.isActive
         self.isPlaying = false
     }
@@ -61,6 +61,7 @@ struct DeviceEntity: Identifiable, Codable, AppEntity {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.addValue(self.token, forHTTPHeaderField: "apptoken")
+        request.timeoutInterval = 3.0
 
         if let body = body {
             request.httpBody = try? JSONSerialization.data(withJSONObject: body)

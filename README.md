@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://cider.sh/remote">
-        <img src="https://cider.sh/og-remote.png" alt="Cider Remote Banner">
+        <img src="./README_data/AppBanner.png" alt="Cider Remote Banner">
     </a>
     <a href="https://apps.apple.com/app/id6670149407">
         <img src="https://apps.lumaa.fr/assets/images/en_app_store_black_badge.svg" alt="Cider Remote on the App Store" width=200 />
@@ -119,4 +119,4 @@ Join the [TestFlight beta](https://testflight.apple.com/join/qTeV2T2w) here.
 
 This project is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license. See the [LICENSE](./LICENSE) file for details.
 
-© Cider Collective 2024-2025
+© Cider Collective 2024-2026

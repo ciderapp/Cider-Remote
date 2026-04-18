@@ -4,6 +4,7 @@ import SwiftUI
 
 struct DeviceRowView: View {
     @ObservedObject var device: Device
+    var hasCurrentMusic: Bool = false
 
     @AppStorage("deviceDetails") private var deviceDetails: Bool = false
 
@@ -24,11 +25,11 @@ struct DeviceRowView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(device.friendlyName)
-                    .font(.headline)
+                    .font(.title2.bold())
                     .lineLimit(1)
                 if deviceDetails {
                     Text("\(device.version) | \(device.platform)")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     Text("Host: \(device.host)")
@@ -39,6 +40,13 @@ struct DeviceRowView: View {
             }
 
             Spacer()
+            
+            if hasCurrentMusic && device.isActive {
+                Image(systemName: "music.note")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+                    .padding(.trailing, 8)
+            }
 
             StatusIndicator(status: self.status)
         }

@@ -6,7 +6,7 @@ struct ChangelogsView: View {
     @Environment(\.colorScheme) private var colorScheme: ColorScheme
     @Environment(\.openURL) private var openURL: OpenURLAction
 
-    private static let changelogs: [Changelog] = [.v310, .v303, .v302, .v301, .v300]
+    private static let changelogs: [Changelog] = [.v400, .v311, .v310, .v303, .v302, .v301, .v300]
 
     @State private var selectedChangelog: Changelog? = nil
 
@@ -133,156 +133,147 @@ struct Changelog: Hashable, Identifiable {
     }
 
     func view(colorScheme: ColorScheme = .light, openURL: OpenURLAction, dismiss: @escaping () -> Void) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading) {
-                HStack {
-                    Text("Remote \(self.version)")
-                        .font(.title.bold())
-                        .lineLimit(1)
+        NavigationStack {
+            ScrollView {
+                LazyVStack(alignment: .leading) {
+                    if let header {
+                        Text(header)
+                            .font(.subheadline.bold())
+                            .padding(.horizontal, 15.0)
+                            .padding(.vertical, 10.0)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                colorScheme == .light ? Color.gray
+                                    .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
+                                    .opacity(0.5)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 5.0))
+                    }
 
-                    Spacer()
+                    if !self.additions.isEmpty {
+                        VStack(alignment: .leading, spacing: 8.0) {
+                            Text("Added:")
+                                .font(.title2.bold())
+                                .lineLimit(1)
 
+                            ForEach(self.additions, id: \.self) { added in
+                                HStack(alignment: .top) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .imageScale(.small)
+                                        .foregroundStyle(Color.white, Color.green)
+
+                                    Text(added)
+                                        .font(.callout)
+                                }
+                            }
+                        }
+                        .padding(.vertical)
+                    }
+
+                    if !self.modifications.isEmpty {
+                        VStack(alignment: .leading, spacing: 8.0) {
+                            Text("Changed:")
+                                .font(.title2.bold())
+                                .lineLimit(1)
+
+                            ForEach(self.modifications, id: \.self) { modified in
+                                HStack(alignment: .top) {
+                                    Image(systemName: "pencil.circle.fill")
+                                        .imageScale(.small)
+                                        .foregroundStyle(Color.white, Color.yellow)
+
+                                    Text(modified)
+                                        .font(.callout)
+                                }
+                            }
+                        }
+                        .padding(.vertical)
+                    }
+
+                    if !self.removals.isEmpty {
+                        VStack(alignment: .leading, spacing: 8.0) {
+                            Text("Removed:")
+                                .font(.title2.bold())
+                                .lineLimit(1)
+
+                            ForEach(self.removals, id: \.self) { removed in
+                                HStack(alignment: .top) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .imageScale(.small)
+                                        .foregroundStyle(Color.white, Color.red)
+
+                                    Text(removed)
+                                        .font(.callout)
+                                }
+                            }
+                        }
+                        .padding(.vertical)
+                    }
+
+                    if let footer {
+                        Text(footer)
+                            .font(.subheadline)
+                            .padding(.horizontal, 15.0)
+                            .padding(.vertical, 10.0)
+                            .background(
+                                colorScheme == .light ? Color.gray
+                                    .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
+                                    .opacity(0.5)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 5.0))
+                    }
+
+                    VStack(alignment: .leading, spacing: 8.0) {
+                        Text("Contributors for \(self.version):")
+                            .font(.title2.bold())
+                            .lineLimit(1)
+
+                        HStack {
+                            ForEach(self.authors, id: \.self) { author in
+                                Text(author)
+                                    .font(.callout.width(.expanded))
+                                    .padding(.horizontal, 10.0)
+                                    .padding(.vertical, 5.0)
+                                    .background(
+                                        colorScheme == .light ? Color.gray
+                                            .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
+                                            .opacity(0.5)
+                                    )
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+
+                    if let url = self.compareUrl {
+                        Button {
+                            openURL(url)
+                        } label: {
+                            HStack(spacing: 8.0) {
+                                Text("View changes")
+                                    .bold()
+
+                                Image(systemName: "arrow.up.right.square")
+                            }
+                            .foregroundStyle(Color.white)
+                        }
+                        .tint(Color.cider)
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle(Text("Remote v\(self.version)"))
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
                     Button {
                         dismiss()
                     } label: {
-                        if #available(iOS 26.0, *) {
-                            Image(systemName: "xmark")
-                                .foregroundStyle(Color(uiColor: UIColor.label))
-                                .padding(12)
-                                .glassEffect(.regular.interactive())
-                        } else {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(Color.cider)
-                        }
+                        Label("Close", systemImage: "xmark")
                     }
-                }
-                .frame(maxWidth: .infinity)
-
-                if let header {
-                    Text(header)
-                        .font(.subheadline.bold())
-                        .padding(.horizontal, 15.0)
-                        .padding(.vertical, 10.0)
-                        .background(
-                            colorScheme == .light ? Color.gray
-                                .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
-                                .opacity(0.5)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 5.0))
-                }
-
-                if !self.additions.isEmpty {
-                    VStack(alignment: .leading, spacing: 8.0) {
-                        Text("Added:")
-                            .font(.title2.bold())
-                            .lineLimit(1)
-
-                        ForEach(self.additions, id: \.self) { added in
-                            HStack(alignment: .top) {
-                                Image(systemName: "plus.circle.fill")
-                                    .imageScale(.small)
-                                    .foregroundStyle(Color.white, Color.green)
-
-                                Text(added)
-                                    .font(.callout)
-                            }
-                        }
-                    }
-                    .padding(.vertical)
-                }
-
-                if !self.modifications.isEmpty {
-                    VStack(alignment: .leading, spacing: 8.0) {
-                        Text("Changed:")
-                            .font(.title2.bold())
-                            .lineLimit(1)
-
-                        ForEach(self.modifications, id: \.self) { modified in
-                            HStack(alignment: .top) {
-                                Image(systemName: "pencil.circle.fill")
-                                    .imageScale(.small)
-                                    .foregroundStyle(Color.white, Color.yellow)
-
-                                Text(modified)
-                                    .font(.callout)
-                            }
-                        }
-                    }
-                    .padding(.vertical)
-                }
-
-                if !self.removals.isEmpty {
-                    VStack(alignment: .leading, spacing: 8.0) {
-                        Text("Removed:")
-                            .font(.title2.bold())
-                            .lineLimit(1)
-
-                        ForEach(self.removals, id: \.self) { removed in
-                            HStack(alignment: .top) {
-                                Image(systemName: "minus.circle.fill")
-                                    .imageScale(.small)
-                                    .foregroundStyle(Color.white, Color.red)
-
-                                Text(removed)
-                                    .font(.callout)
-                            }
-                        }
-                    }
-                    .padding(.vertical)
-                }
-
-                if let footer {
-                    Text(footer)
-                        .font(.subheadline)
-                        .padding(.horizontal, 15.0)
-                        .padding(.vertical, 10.0)
-                        .background(
-                            colorScheme == .light ? Color.gray
-                            .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
-                            .opacity(0.5)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 5.0))
-                }
-
-                VStack(alignment: .leading, spacing: 8.0) {
-                    Text("Contributors for \(self.version):")
-                        .font(.title2.bold())
-                        .lineLimit(1)
-
-                    HStack {
-                        ForEach(self.authors, id: \.self) { author in
-                            Text(author)
-                                .font(.callout.width(.expanded))
-                                .padding(.horizontal, 10.0)
-                                .padding(.vertical, 5.0)
-                                .background(
-                                    colorScheme == .light ? Color.gray
-                                        .opacity(0.3) : Color(uiColor: UIColor.tertiarySystemBackground)
-                                        .opacity(0.5)
-                                )
-                                .clipShape(Capsule())
-                        }
-                    }
-                }
-
-                if let url = self.compareUrl {
-                    Button {
-                        openURL(url)
-                    } label: {
-                        HStack(spacing: 8.0) {
-                            Text("View changes")
-                                .bold()
-
-                            Image(systemName: "arrow.up.right.square")
-                        }
-                        .foregroundStyle(Color.white)
-                    }
-                    .tint(Color.cider)
-                    .buttonStyle(.borderedProminent)
                 }
             }
-            .padding()
         }
     }
 }
@@ -290,9 +281,68 @@ struct Changelog: Hashable, Identifiable {
 // MARK: Changelogs are HERE
 
 extension Changelog {
+    /// Remote 4.0.0
+    static var v400: Changelog {
+        var temp = Changelog(version: "4.0.0", authors: ["Lumaa", "Deadfrost"], commits: "41dc79a...v4")
+        temp = temp
+            .setChanges(additions: [
+				"A brand new onboarding screen, showcasing Remote's best features",
+				"Compatibility with Cider 4.x",
+				"Cross-compatibility with previous versions of Cider",
+                "Cider Collective team in the contributors screen",
+				"New Cider 4.x authentication method (default)",
+                "Animated album covers",
+                "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
+                "Horizontal Layout can now have the queue enabled",
+                "Share lyrics by tap-and-holding a lyric (except Immersive Lyrics)",
+                "Tap a lyric to go and listen to it (except Immersive Lyrics)",
+                "Left-to-right and right-to-left lyrics (except Immersive Lyrics)",
+                "Remote now displays the audio quality (Dolby Atmos, Lossless, Hi-Res Lossless...)",
+                "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
+                "Slowly moving color gradient in the background",
+                "Swipe a Cider device to the left to send your iPhone's/iPad's playing song to Cider",
+                "New \"Cider Remote\" title integrated in the screen's top bar"
+            ], modifications: [
+                "Temporary?: iOS 26+ only",
+                "The \"Cider Devices\" title has been replaced with \"Cider Remote\"",
+                "\"Library Browser\" button is always displayed now",
+                "A more Apple Music-like user interface when remote-ing",
+                "Much simpler, less buggy device list",
+                "Unified design in the changelogs screen and connection guide screen",
+                "More Liquid Glass",
+                "Contributors screen moved in the copyright section",
+                "Smaller \"Library Browser\" button to fit its new location",
+                "The message about Cider 4.x & Remote v4.0.0 will now re-appear with new text",
+                "Changed macOS icon for default macOS icon",
+                "Changed Connection Guide icon",
+				"Updated Connection Guide for Cider 4.x",
+				"Connection Steps now uses the Cider color",
+                "Fix: Live Activity button should work properly whatever the device order",
+                "Fix: Random crash when opening the QR code scan",
+                "Fix: Library Browser cover images should load for most of them (still not all...)",
+                "Fix: Ellipsis button was barely tappable (thanks MatyBachy!)",
+                "Fix: Lyrics now correctly load",
+            ], removals: [
+                "Lyrics cache",
+                "Background with blurred song cover",
+                "\"Use Dynamic Colors\", \"Button Size\" settings, and contributors text in the settings",
+                "View Models"
+            ])
+        temp = temp.setNotes(headerNote: "Remote v4.0.0 is full redesign of the remote app and goes along with Cider 4's new logistic")
+        return temp
+    }
+
+    /// Remote 3.1.1
+    static var v311: Changelog {
+        var temp = Changelog(version: "3.1.1", authors: ["Lumaa"], commits: "2021475...41dc79a")
+        temp = temp
+            .setChanges(additions: ["A message about Cider 4 & Remote v4.0.0 will now appear"], modifications: ["Fix: Playlists won't crash the app anymore"])
+        return temp
+    }
+
     /// Remote 3.1.0
     static var v310: Changelog {
-        var temp = Changelog(version: "3.1.0", authors: ["Lumaa"], commits: "7b5dd1...main")
+        var temp = Changelog(version: "3.1.0", authors: ["Lumaa"], commits: "7b5dd1...2021475")
         temp = temp
             .setChanges(additions: [
                 "iOS 26 support",

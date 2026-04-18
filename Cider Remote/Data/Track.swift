@@ -1,9 +1,10 @@
 // Made by Lumaa
 
 import Foundation
+import SwiftUI
 import UIKit
 
-struct Track: Codable, Equatable {
+struct Track: Codable, Identifiable, Equatable {
     let id: String
     let catalogId: String
     let title: String
@@ -14,7 +15,6 @@ struct Track: Codable, Equatable {
     var artworkData: Data
     var songHref: String? = nil
 
-
     init(
         id: String,
         catalogId: String,
@@ -23,7 +23,7 @@ struct Track: Codable, Equatable {
         album: String,
         artwork: String,
         duration: Double,
-        artworkData: Data,
+        artworkData: Data = Data(),
         songHref: String? = nil
     ) {
         self.id = id
@@ -62,29 +62,66 @@ struct Track: Codable, Equatable {
         return nil
     }
 
-    func getArtwork() -> UIImage? {
-        var ui: UIImage? = nil
-        Task {
-            do {
-                let url: URL = URL(string: self.artwork)!
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let image = UIImage(data: data) {
-                    ui = image
-                }
-            } catch {
-                print("Error loading image: \(error)")
-            }
-        }
-        return ui
-    }
-
-    func getArtwork() -> UIImage {
+    func getArtworkLocally() -> UIImage {
         return UIImage(data: self.artworkData) ?? UIImage.logo
     }
 
     mutating func setArtworkData() async {
         if let (data, _) = try? await URLSession.shared.data(from: URL(string: self.artwork)!) {
             self.artworkData = data
+        }
+    }
+
+    enum AudioType: String, Equatable {
+        case unknown = "unknown"
+        case lossless = "lossless"
+        case hiResLossless = "hi-res-lossless"
+        case dolbyAtmos = "atmos"
+
+        @ViewBuilder
+        var view: some View {
+            switch self {
+                case .unknown:
+                    Image(systemName: "circle.slash")
+                case .lossless:
+                    Label("Lossless", image: .lossless)
+                        .foregroundStyle(Color.secondary)
+                        .font(.callout)
+                case .hiResLossless:
+                    Label("Hi-Res Lossless", image: .lossless)
+                        .foregroundStyle(Color.secondary)
+                        .font(.callout)
+                case .dolbyAtmos:
+                    Image(.dolbyAtmos)
+                        .resizable()
+                        .scaledToFit()
+                        .colorInvert()
+                        .frame(height: 10.0)
+            }
+        }
+
+        static func find(_ str: String) -> Self {
+            if str == self.lossless.rawValue {
+                return self.lossless
+            } else if str == self.hiResLossless.rawValue {
+                return self.hiResLossless
+            } else if str == self.dolbyAtmos.rawValue {
+                return self.dolbyAtmos
+            }
+
+            return .unknown
+        }
+
+        static func find(_ strs: [String]) -> Self {
+            if strs.contains(self.dolbyAtmos.rawValue) {
+                return self.dolbyAtmos
+            } else if strs.contains(self.hiResLossless.rawValue) {
+                return self.hiResLossless
+            } else if strs.contains(self.lossless.rawValue) {
+                return self.lossless
+            }
+
+            return .unknown
         }
     }
 

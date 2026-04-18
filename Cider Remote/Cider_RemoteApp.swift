@@ -15,11 +15,17 @@ struct Cider_RemoteApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .onAppear {
-                    Self.delegate = self.delegate
-                    RemoteShortcuts.updateAppShortcutParameters()
-                }
+			ZStack {
+				if UserDefaults.standard.value(forKey: "onboarded") != nil ? UserDefaults.standard.bool(forKey: "onboarded") : false {
+					ContentView()
+				} else {
+					OnboardingView()
+				}
+			}
+			.onAppear {
+				Self.delegate = self.delegate
+				RemoteShortcuts.updateAppShortcutParameters()
+			}
         }
     }
 }

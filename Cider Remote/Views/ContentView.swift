@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var colorScheme = ColorSchemeManager()
-
     @State private var showingSettings = false
     @StateObject private var prompt: AppPrompt = .shared
 
@@ -37,7 +35,6 @@ struct ContentView: View {
                         }
                     }
             }
-            .tint(Color.cider)
 
             if !isGlass {
                 if AppPrompt.shared.showingPrompt == .newDevice {
@@ -57,7 +54,6 @@ struct ContentView: View {
                 }
             }
         }
-        .environmentObject(colorScheme)
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
@@ -80,7 +76,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if !UserDefaults.standard.bool(forKey: "updatePopup") {
+            UserDefaults.standard.removeObject(forKey: "updatePopup")
+
+            if !UserDefaults.standard.bool(forKey: "updatePopup_v4") {
                 AppPrompt.shared.showingPrompt = .update
             }
         }
@@ -90,12 +88,12 @@ struct ContentView: View {
 struct UpdatePromptView: View {
     var prompt: Prompt {
         var p: Prompt = Prompt(
-            symbol: "arrow.down.app.dashed.trianglebadge.exclamationmark",
-            title: "Remote v4.0.0 & Cider 4",
+            symbol: "wand.and.sparkles.inverse",
+            title: "Remote v4.0.0",
             view: AnyView(self.txt),
             actionLabel: "OK",
             action: {
-                UserDefaults.standard.set(false, forKey: "updatePopup")
+                UserDefaults.standard.set(false, forKey: "updatePopup_v4")
             }
         )
         return p.cancellable(false)
@@ -108,9 +106,9 @@ struct UpdatePromptView: View {
     }
 
     var txt: some View {
-        Text("The upcoming Cider version, Cider 4, might cause compatibility issues with Cider Remote v3.1.1 and less. Please remember to **update Cider Remote** along with Cider to have the best music-listening experience.\n\nYou will not be shown this message later.")
+        Text("Welcome to Remote Beta v4.0.0. Please remember to report bugs and issues within the TestFlight feedback feature or GitHub issues. Cheers, Lumaa")
             .font(.subheadline)
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(.leading)
             .padding(.horizontal)
     }
 }
@@ -187,7 +185,7 @@ struct FriendlyNamePromptView: View {
             version: connectionInfo.initialData.version,
             platform: connectionInfo.initialData.platform,
             backend: connectionInfo.initialData.platform, // Using platform as backend for now
-            connectionMethod: connectionInfo.method.rawValue,
+            connectionMethod: connectionInfo.method,
             isActive: false,
             os: connectionInfo.initialData.os
         )
@@ -237,18 +235,6 @@ struct CameraPromptView: View {
     }
 }
 
-struct LazyView<Content: View>: View {
-    let build: () -> Content
-
-    init(_ build: @autoclosure @escaping () -> Content) {
-        self.build = build
-    }
-
-    var body: Content {
-        build()
-    }
-}
-
 struct StatusIndicator: View {
     let status: DeviceStatus
 
@@ -281,78 +267,11 @@ struct StatusIndicator: View {
     }
 }
 
-struct ConnectionGuideView: View {
-    @Environment(\.presentationMode) var presentationMode
-    
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Prerequisites:")
-                        .font(.headline)
-                    BulletedList(items: [
-                        "Cider 2.5.3+ is installed (... > Updates)",
-                        "Cider installed and running on your computer (Windows, macOS, or Linux)",
-                        "Your Device and Cider on the same local network (If using LAN)",
-                        "Cider's RPC & WebSocket server enabled (Settings > Connectivity)"
-                    ])
-                    
-                    Text("Connection Steps:")
-                        .font(.headline)
-                    VStack(alignment: .leading, spacing: 15) {
-                        GuideStep(number: 1, text: "Open Cider Remote: Launch the Cider Remote app on your iPhone.")
-                        GuideStep(number: 2, text: "Prepare Cider: Open Cider on your Computer, tap the '...' menu, and visit 'Help > Connect a Remote' and create a device. (Some devices may prefer WAN over LAN.)")
-                        GuideStep(number: 3, text: "Scan QR Code: In Cider Remote, tap 'Add a New Cider Device' and use the camera to scan the QR code displayed in Cider.")
-                        GuideStep(number: 4, text: "Confirm Connection: Your iPhone should now be paired with Cider.")
-                    }
-                    
-                    Text("Troubleshooting:")
-                        .font(.headline)
-                    Text("If you can't connect:")
-                        .font(.subheadline)
-                    BulletedList(items: [
-                        "Ensure both devices are on the same network",
-                        "Check if Cider's RPC server is running (port 10767)",
-                        "Restart both Cider and Cider Remote",
-                        "Check firewall settings (see below)"
-                    ])
-                    
-                    Text("Firewall Settings:")
-                        .font(.subheadline)
-                    BulletedList(items: [
-                        "Windows: Allow Cider through Windows Defender Firewall (Inbound Port 10767)",
-                        "macOS: Add Cider to allowed apps in Security & Privacy > Firewall",
-                        "Linux: Use your distribution's firewall tool to allow port 10767"
-                    ])
-                    
-                    Text("For QR code scanning issues:")
-                        .font(.subheadline)
-                    BulletedList(items: [
-                        "Ensure the code is clearly visible and well-lit",
-                        "Try adjusting the distance between your phone and the screen"
-                    ])
-                    
-                    Text("For further assistance, please visit our support forum or GitHub issues page.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .padding(.top)
-                }
-                .padding()
-            }
-            .navigationBarTitle("Connection Guide")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
-        }
-    }
-}
-
 struct DeviceIconView: View {
     let device: Device
 
     var body: some View {
-        Image(uiImage: deviceImage)
+        deviceImage
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 40, height: 40)
@@ -361,17 +280,18 @@ struct DeviceIconView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    var deviceImage: UIImage {
-        let osType = device.os ?? device.platform
-        switch osType.lowercased() {
-        case "win32":
-            return UIImage(named: "Windows") ?? UIImage(systemName: "desktopcomputer")!
-        case "darwin":
-            return UIImage(named: "macOS") ?? UIImage(systemName: "desktopcomputer")!
-        case "linux":
-            return UIImage(named: "Linux") ?? UIImage(systemName: "desktopcomputer")!
-        default:
-            return UIImage(systemName: "desktopcomputer")!
+    var deviceImage: Image {
+		let osType = device.os
+
+        switch osType {
+			case .windows:
+				return Image("Windows")
+			case .macos:
+				return Image("macOS")
+			case .linux:
+				return Image("Linux")
+			default:
+				return Image(systemName: "desktopcomputer")
         }
     }
 }
