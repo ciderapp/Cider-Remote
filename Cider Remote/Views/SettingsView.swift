@@ -76,7 +76,11 @@ struct SettingsView: View {
 						Text("Show Onboarding")
 					}
 				}
-				.fullScreenCover(isPresented: $onboardingScreen) { OnboardingView() }
+				.fullScreenCover(isPresented: $onboardingScreen) {
+					OnboardingView {
+						self.onboardingScreen = false
+					}
+				}
 
                 Section(header: Text("About")) {
 					LabeledContent {

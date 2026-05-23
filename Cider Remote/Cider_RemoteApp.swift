@@ -19,7 +19,7 @@ struct Cider_RemoteApp: App {
 				if UserDefaults.standard.value(forKey: "onboarded") != nil ? UserDefaults.standard.bool(forKey: "onboarded") : false {
 					ContentView()
 				} else {
-					OnboardingView()
+					OnboardingView() 
 				}
 			}
 			.onAppear {

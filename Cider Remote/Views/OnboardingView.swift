@@ -6,6 +6,11 @@ struct OnboardingView: View {
 	@Environment(\.colorScheme) private var originalScheme: ColorScheme
 
 	@State private var appCover: Bool = false
+	@State private var onOK: (() -> Void)?
+
+	init(onOK: (() -> Void)? = nil) {
+		self.onOK = onOK
+	}
 
 	var body: some View {
 		ZStack {
@@ -26,8 +31,12 @@ struct OnboardingView: View {
 				Spacer()
 
 				Button {
-					self.appCover.toggle()
-					UserDefaults.standard.set(true, forKey: "onboarded")
+					if let onOK {
+						onOK()
+					} else {
+						self.appCover.toggle()
+						UserDefaults.standard.set(true, forKey: "onboarded")
+					}
 				} label: {
 					Text("OK")
 						.frame(maxWidth: .infinity, minHeight: 30.0, maxHeight: 30.0)
