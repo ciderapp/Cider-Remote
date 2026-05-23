@@ -278,7 +278,7 @@ struct Changelog: Hashable, Identifiable {
     }
 }
 
-// MARK: Changelogs are HERE
+// MARK: - Changelogs are HERE
 
 extension Changelog {
     /// Remote 4.0.0
@@ -294,6 +294,7 @@ extension Changelog {
                 "Animated album covers",
                 "Shuffle, repeat and autoplay buttons at the top of the queue (thanks gabrielzv1233!)",
                 "Horizontal Layout can now have the queue enabled",
+				"Remote can get lyrics from Taproom's Lyrics Studio (using LyricsStudioKit)",
                 "Share lyrics by tap-and-holding a lyric (except Immersive Lyrics)",
                 "Tap a lyric to go and listen to it (except Immersive Lyrics)",
                 "Left-to-right and right-to-left lyrics (except Immersive Lyrics)",
