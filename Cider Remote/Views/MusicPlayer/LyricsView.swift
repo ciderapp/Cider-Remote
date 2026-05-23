@@ -337,7 +337,17 @@ struct LyricsScrollView: View {
                                     Label("Share lyric", systemImage: "square.and.arrow.up")
                                 }
                                 .disabled(self.track == nil)
-                            }
+							} preview: {
+								LyricLineView(
+									lyric: line,
+									isActive: true,
+									maxWidth: geometry.size.width - 20
+								)
+								.frame(maxWidth: .infinity, alignment: line.altVoice ? .trailing : .leading)
+								.padding(EdgeInsets(top: 60, leading: 40, bottom: 60, trailing: 40))
+								.background(Color.ciderBack)
+								.clipShape(RoundedRectangle(cornerRadius: 15.0))
+							}
                         }
                         Spacer(minLength: viewportHeight - 180) // Remaining space below lyrics
                     }
