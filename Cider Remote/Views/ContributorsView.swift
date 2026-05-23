@@ -167,7 +167,7 @@ struct ContributorsView: View {
         let pfp: URL?
         let commitCount: Int
 
-        /// Cider Collective (10/25)
+        /// Cider Collective (05/23/2026)
         static let collective: [Contrib] = [
             .init(name: "cryptofyre", ghLink: URL(string: "https://github.com/cryptofyre")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/33162551?v=4")),
             .init(name: "Core", ghLink: URL(string: "https://github.com/coredev-uk")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/64542347?v=4")),
@@ -179,7 +179,6 @@ struct ContributorsView: View {
             .init(name: "Quacksire", ghLink: URL(string: "https://github.com/quacksire")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/19170969?v=4")),
             .init(name: "Amaru", ghLink: URL(string: "https://github.com/Amaru8")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/52407090?v=4")),
             .init(name: "Swiftzerr", ghLink: URL(string: "https://github.com/elliotjarnit")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/67812203?v=4")),
-            .init(name: "DeadFrost", ghLink: URL(string: "https://github.com/DeadFrostt")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/71704732?v=4")),
             .init(name: "Lumaa", ghLink: URL(string: "https://github.com/lumaa-dev")!, pfp: URL(string: "https://avatars.githubusercontent.com/u/93350976?v=4"))
         ]
 
