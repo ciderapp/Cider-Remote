@@ -76,7 +76,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            UserDefaults.standard.removeObject(forKey: "updatePopup")
+			#if DEBUG
+            UserDefaults.standard.removeObject(forKey: "updatePopup_v4")
+			#endif
 
             if !UserDefaults.standard.bool(forKey: "updatePopup_v4") {
                 AppPrompt.shared.showingPrompt = .update

@@ -6,7 +6,7 @@ struct OnboardingView: View {
 	@Environment(\.colorScheme) private var originalScheme: ColorScheme
 
 	@State private var appCover: Bool = false
-	@State private var onOK: (() -> Void)?
+	private var onOK: (() -> Void)?
 
 	init(onOK: (() -> Void)? = nil) {
 		self.onOK = onOK
