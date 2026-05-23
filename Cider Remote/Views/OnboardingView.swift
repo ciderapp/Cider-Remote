@@ -132,6 +132,7 @@ struct OnboardingView: View {
 		case libraryBrowser
 		case horizontalLayout
 		case lyrics
+		case studio
 		case controlCenter
 
 		var appFeature: AppFeature {
@@ -144,6 +145,8 @@ struct OnboardingView: View {
 					return .init("Horizontal Layout", description: "Landscape or portrait, Remote will always have the perfect layout", systemImage: "iphone.landscape")
 				case .lyrics:
 					return .init("Sing along!", description: "Sing your favorite songs' lyrics at all times, and share them online!", systemImage: "music.microphone")
+				case .studio:
+					return .init("Sing together!", description: "Remote supports user submitted lyrics through Taproom!", systemImage: "person.3.fill")
 				case .controlCenter:
 					return .init("Control Center actions", description: "Not in Remote? Control Cider through the Control Center", systemImage: "switch.2")
 			}
