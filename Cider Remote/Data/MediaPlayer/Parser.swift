@@ -91,6 +91,7 @@ class Parser: NSObject, XMLParserDelegate {
     enum LyricProvider {
         case mxm
         case am
+		case studio
         case cache
     }
 }

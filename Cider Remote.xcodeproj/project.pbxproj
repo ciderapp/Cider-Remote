@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B98912DB2FC1864A00937AA2 /* LyricsStudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = B98912DA2FC1864A00937AA2 /* LyricsStudioKit */; };
+		B98912DD2FC187DF00937AA2 /* LyricsStudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = B98912DC2FC187DF00937AA2 /* LyricsStudioKit */; };
 		B9A455622CC51C19006AEB89 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = B9A455612CC51C19006AEB89 /* SocketIO */; };
 		B9CDA83D2CC686AA00FBF580 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83C2CC686AA00FBF580 /* WidgetKit.framework */; };
 		B9CDA83F2CC686AA00FBF580 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9CDA83E2CC686AA00FBF580 /* SwiftUI.framework */; };
@@ -116,6 +118,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9CDA83F2CC686AA00FBF580 /* SwiftUI.framework in Frameworks */,
+				B98912DD2FC187DF00937AA2 /* LyricsStudioKit in Frameworks */,
 				B9CDA83D2CC686AA00FBF580 /* WidgetKit.framework in Frameworks */,
 				B9CDA87B2CC6905C00FBF580 /* SocketIO in Frameworks */,
 			);
@@ -126,6 +129,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9A455622CC51C19006AEB89 /* SocketIO in Frameworks */,
+				B98912DB2FC1864A00937AA2 /* LyricsStudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +187,7 @@
 			name = NowPlayingExtension;
 			packageProductDependencies = (
 				B9CDA87A2CC6905C00FBF580 /* SocketIO */,
+				B98912DC2FC187DF00937AA2 /* LyricsStudioKit */,
 			);
 			productName = NowPlayingExtension;
 			productReference = B9CDA83A2CC686AA00FBF580 /* NowPlayingExtension.appex */;
@@ -209,6 +214,7 @@
 			name = "Cider Remote";
 			packageProductDependencies = (
 				B9A455612CC51C19006AEB89 /* SocketIO */,
+				B98912DA2FC1864A00937AA2 /* LyricsStudioKit */,
 			);
 			productName = "Cider Remote";
 			productReference = FA14E3472C7CA1C200904A49 /* Cider Remote.app */;
@@ -244,6 +250,7 @@
 			packageReferences = (
 				B9FC584E2CC51B110063D6D8 /* XCRemoteSwiftPackageReference "Starscream" */,
 				B9A455602CC51C19006AEB89 /* XCRemoteSwiftPackageReference "socket" */,
+				B98912D92FC1864A00937AA2 /* XCRemoteSwiftPackageReference "LyricsStudioKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FA14E3482C7CA1C200904A49 /* Products */;
@@ -607,6 +614,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B98912D92FC1864A00937AA2 /* XCRemoteSwiftPackageReference "LyricsStudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/the-amber-team/LyricsStudioKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		B9A455602CC51C19006AEB89 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -626,6 +641,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B98912DA2FC1864A00937AA2 /* LyricsStudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B98912D92FC1864A00937AA2 /* XCRemoteSwiftPackageReference "LyricsStudioKit" */;
+			productName = LyricsStudioKit;
+		};
+		B98912DC2FC187DF00937AA2 /* LyricsStudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B98912D92FC1864A00937AA2 /* XCRemoteSwiftPackageReference "LyricsStudioKit" */;
+			productName = LyricsStudioKit;
+		};
 		B9A455612CC51C19006AEB89 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B9A455602CC51C19006AEB89 /* XCRemoteSwiftPackageReference "socket" */;

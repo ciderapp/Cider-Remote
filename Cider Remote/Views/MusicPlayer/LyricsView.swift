@@ -1,7 +1,8 @@
 // Made by Lumaa
 
-
 import SwiftUI
+import LyricsStudioKit
+import MusicKit
 
 struct LyricsView: View {
     @Environment(\.dismiss) private var dismiss: DismissAction
@@ -31,6 +32,8 @@ struct LyricsView: View {
                 return "Musixmatch"
             case .am:
                 return "Apple Music"
+			case .studio:
+				return "User Submitted"
             case .cache:
                 return "Remote (Cache)"
         }
@@ -122,10 +125,11 @@ struct LyricsView: View {
         defer { self.isLoading = false }
         self.isLoading = true
 
-        let success: Bool = await self.fetchLyricsAm() // apple music
-        if !success {
-            _ = await self.fetchLyricsMxm() // musixmatch
-        }
+		guard await self.fetchLyricsStudio() == false else { return } // Cider Lyrics Studio (powered by LyricsStudioKit)
+
+		guard await self.fetchLyricsAm() == false else { return }
+
+		guard await self.fetchLyricsMxm() == false else { return }
     }
 
     /// Returns true if the lyrics were found and fetched
@@ -229,6 +233,33 @@ struct LyricsView: View {
         }
         return false
     }
+
+	private func fetchLyricsStudio() async -> Bool {
+		guard let currentTrack else { return false }
+
+		print("Current track catalog: \(currentTrack.catalogId)")
+
+		do {
+			let result: StudioLyricResponse = try await LyricsStudio.fetchLyrics(for: MusicItemID(rawValue: currentTrack.catalogId))
+
+			guard let data: Data = result.ttml.data(using: .utf8) else { throw NetworkError.decodingError }
+
+			let xmlParser = XMLParser(data: data)
+			let ttmlParser = Parser(provider: .studio)
+			xmlParser.delegate = ttmlParser
+			xmlParser.parse()
+
+			self.lyricsProvider = .studio
+			self.lyrics = ttmlParser.lyrics
+			self.lyricCache[currentTrack.id] = self.lyrics
+
+			return true
+		} catch {
+			print("Error fetching studio: \(error)")
+		}
+
+		return false
+	}
 
     private func getStorefront() async -> String? {
         do {
