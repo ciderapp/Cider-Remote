@@ -144,6 +144,7 @@ extension Device {
     func runAppleMusicAPI(path: String, returnContent: Bool = true) async throws -> Any {
         do {
 			let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": path], version: "v1")
+			print(data)
             if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any] {
                 guard returnContent else { return jsonDict }
 
@@ -152,7 +153,9 @@ extension Device {
                 } else if let subdata = data["data"] as? [[String: Any]] { // array of objects
                     return subdata
                 }
-            }
+			} else if let jsonDict = data as? [String: Any], let arrayData = jsonDict["data"] as? [[String: Any]] {
+				return arrayData
+			}
 
             return data
         } catch {

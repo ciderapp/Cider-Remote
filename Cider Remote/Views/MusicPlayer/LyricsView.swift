@@ -204,12 +204,11 @@ struct LyricsView: View {
 
             print("Fetching lyrics FROM CLIENT for track: \(currentTrack.id)")
             let path: String = "/v1/catalog/\(storefront)/songs/\(currentTrack.catalogId)/lyrics?l=en-US&platform=web&art[url]=f"
-            let data = try await device.sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": path])
+			let data = try await device.sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": path], version: "v1")
 
-            print(data)
-            if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any], let subdata = data["data"] as? [[String: Any]], let lyricsData = subdata[0]["attributes"] as? [String: Any] {
+			if let jsonDict = (data as? [String: Any])?["data"] as? [[String: Any]], let lyricsData = jsonDict[0]["attributes"] as? [String: Any] {
                 guard let lyricsXml = lyricsData["ttml"] as? String, let data = lyricsXml.data(using: .utf8) else {
-                    print("-- After fetch decoding error --")
+                    print("-- No TTML --")
                     throw NetworkError.decodingError
                 }
 
@@ -233,11 +232,15 @@ struct LyricsView: View {
 
     private func getStorefront() async -> String? {
         do {
-            guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]], !data.isEmpty else { return nil }
+			guard let data: [[String: Any]] = try await device.runAppleMusicAPI(path: "/v1/me/storefront?limit=1") as? [[String: Any]] else {
+				return nil
+			}
 
-            if let storefrontId: String = data[0]["id"] as? String {
+			if let storefrontId: String = data[0]["id"] as? String {
                 return storefrontId
             }
+
+			return nil
         } catch {
             print("Error fetching storefront: \(error)")
         }
