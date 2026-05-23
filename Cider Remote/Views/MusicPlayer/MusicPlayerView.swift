@@ -638,7 +638,7 @@ struct MusicPlayerView: View {
     func startListening() {
         print("Attempting to connect to socket")
 		let socketURL = device.connectionMethod == .tunnel ? "https://\(device.host)" : "http://\(device.host):10767"
-        manager = SocketManager(socketURL: URL(string: socketURL)!, config: [.log(true), .compress])
+        manager = SocketManager(socketURL: URL(string: socketURL)!, config: [.log(false), .compress])
         socket = manager?.defaultSocket
 
         setupSocketEventHandlers()
@@ -664,8 +664,6 @@ struct MusicPlayerView: View {
         }
 
         socket?.on("API:Playback") { data, ack in
-			print("API PLAYBACK: \(data)")
-
             guard let playbackData = data[0] as? [String: Any], let type = playbackData["type"] as? String else {
                 print("Invalid playback data received")
                 return
@@ -887,7 +885,7 @@ struct MusicPlayerView: View {
             artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
             artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
 
-            var newTrack: Track = Track(id: id ?? "", catalogId: amId ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
+            var newTrack: Track = Track(id: id ?? "", catalogId: amId ?? id ?? "", title: title, artist: artist, album: album, artwork: artworkUrl, duration: duration / 1000)
 
             if self.currentTrack != newTrack {
                 Task {
@@ -1214,7 +1212,7 @@ struct MusicPlayerView: View {
     func searchSong(query: String) async -> [Track] {
         print("Searching for: \(query)")
         do {
-            let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": "/v1/catalog/us/search?term=\(query)&types=songs"])
+			let data = try await sendRequest(endpoint: "amapi/run-v3", method: "POST", body: ["path": "/v1/catalog/us/search?term=\(query)&types=songs"], version: "v1")
 
             if let jsonDict = data as? [String: Any], let data = jsonDict["data"] as? [String: Any], let _results = data["results"] as? [String: Any] {
                 guard let songs = _results["songs"] as? [String: Any], let results = songs["data"] as? [[String: Any]] else {
