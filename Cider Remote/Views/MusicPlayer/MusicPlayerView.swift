@@ -12,6 +12,7 @@ import WidgetKit
 import AVKit
 
 struct MusicPlayerView: View {
+	@Environment(\.dismiss) private var dismiss: DismissAction
     @Environment(\.colorScheme) private var systemColorScheme: ColorScheme
     @Environment(\.scenePhase) private var scenePhase: ScenePhase
 
@@ -98,6 +99,7 @@ struct MusicPlayerView: View {
                 self.landscape(userDevice.horizontalOrientation)
             }
         }
+		.navigationBarBackButtonHidden()
         .fullScreenCover(isPresented: $showingLibrary) {
             BrowserView(device: device)
                 .environment(\.colorScheme, systemColorScheme) // restore user's color scheme
@@ -397,8 +399,9 @@ struct MusicPlayerView: View {
                         currentTrack: currentTrack,
                         toggleAddToLibrary: toggleAddToLibrary,
                         toggleLike: toggleLike,
-                        isInLibrary: $isInLibrary,
-                        isLiked: $isLiked
+						dismissView: dismiss,
+						isInLibrary: $isInLibrary,
+						isLiked: $isLiked
                     )
                 }
             }

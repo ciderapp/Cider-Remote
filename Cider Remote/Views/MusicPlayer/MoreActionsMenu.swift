@@ -7,6 +7,7 @@ struct MoreActionsMenu: View {
     
     var toggleAddToLibrary: () async -> Void
     var toggleLike: () async -> Void
+	var dismissView: DismissAction
 
     @Binding var isInLibrary: Bool
     @Binding var isLiked: Bool
@@ -40,6 +41,15 @@ struct MoreActionsMenu: View {
                     Label("Share", systemImage: "square.and.arrow.up.fill")
                 }
             }
+
+			Divider()
+
+			Button(role: .destructive) {
+				self.dismissView()
+			} label: {
+				Text("Close device")
+					.foregroundStyle(Color.red)
+			}
         } label: {
             Image(systemName: "ellipsis")
                 .resizable()
