@@ -1055,9 +1055,12 @@ struct MusicPlayerView: View {
         do {
 			let path: String = device.useV2 ? "playback/repeat" : "playback/repeat-mode"
             let result = try await sendRequest(endpoint: path, method: "GET")
-            if let data = result as? [String: Any] {
+			if let data = result as? [String: Any], device.useV2 {
+				let val: String = data["mode"] as? String ?? "none"
+				self.repeatMode = .init(rawValue: val) ?? .none
+			} else if let data = result as? [String: Any], !device.useV2 {
                 let val: Int = data["value"] as? Int ?? 0
-                self.repeatMode = .init(rawValue: val) ?? .none
+				self.repeatMode = .from(val)
             }
         } catch {
             handleError(error)
@@ -1068,10 +1071,13 @@ struct MusicPlayerView: View {
         do {
 			let path: String = device.useV2 ? "playback/shuffle" : "playback/shuffle-mode"
             let result = try await sendRequest(endpoint: path, method: "GET")
-            if let data = result as? [String: Any] {
-                let val: Int = data["value"] as? Int ?? 0
-                self.shuffleMode = .init(rawValue: val) ?? .none
-            }
+			if let data = result as? [String: Any], device.useV2 {
+				let enabled: Bool = data["enabled"] as? Bool ?? false
+				self.shuffleMode = enabled ? .shuffling : .none
+			} else if let data = result as? [String: Any], !device.useV2 {
+				let val: Int = data["value"] as? Int ?? 0
+				self.shuffleMode = val == 1 ? .shuffling : .none
+			}
         } catch {
             handleError(error)
         }
@@ -1111,7 +1117,7 @@ struct MusicPlayerView: View {
         print("Cycling through repeat")
         let lastRepeat: RepeatMode = self.repeatMode
         withAnimation {
-            self.repeatMode = .init(rawValue: self.repeatMode.rawValue + 1) ?? .none
+			self.repeatMode = self.repeatMode.next
         }
         do {
 			let path: String = device.useV2 ? "playback/repeat/toggle" : "playback/toggle-repeat"
@@ -1126,7 +1132,7 @@ struct MusicPlayerView: View {
         print("Cycling through shuffle")
         let lastShuffle: ShuffleMode = self.shuffleMode
         withAnimation {
-            self.shuffleMode = .init(rawValue: self.shuffleMode.rawValue + 1) ?? .none
+			self.shuffleMode = self.shuffleMode.next
         }
         do {
 			let path: String = device.useV2 ? "playback/shuffle/toggle" : "playback/toggle-shuffle"
@@ -1380,10 +1386,10 @@ struct MusicPlayerView: View {
         print("Error: \(errorMessage ?? "Unknown error")")
     }
 
-    private enum RepeatMode: Int {
-        case none = 0
-        case queue = 2
-        case track = 1
+    private enum RepeatMode: String {
+        case none = "none"
+        case queue = "all"
+        case track = "one"
 
         var symbol: String {
             switch self {
@@ -1393,11 +1399,42 @@ struct MusicPlayerView: View {
                     "repeat.1"
             }
         }
+
+		var next: Self {
+			switch self {
+				case .none:
+					return .track
+				case .queue:
+					return .none
+				case .track:
+					return .queue
+			}
+		}
+
+		static func from(_ int: Int) -> Self {
+			switch int {
+				case 1:
+					return .track
+				case 2:
+					return .queue
+				default:
+					return .none
+			}
+		}
     }
 
-    private enum ShuffleMode: Int {
-        case none = 0
-        case shuffling = 1
+    private enum ShuffleMode {
+        case none
+        case shuffling
+
+		var next: Self {
+			switch self {
+				case .none:
+					return .shuffling
+				case .shuffling:
+					return .none
+			}
+		}
     }
 }
 
