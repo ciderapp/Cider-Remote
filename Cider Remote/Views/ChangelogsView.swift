@@ -301,6 +301,7 @@ extension Changelog {
                 "Remote now displays the audio quality (Dolby Atmos, Lossless, Hi-Res Lossless...)",
                 "Added a \"Show Album\" button in the Library Browser when viewing a playlist",
                 "Slowly moving color gradient in the background",
+				"Moved close button to the ellipsis menu: \"Close device\"",
                 "Swipe a Cider device to the left to send your iPhone's/iPad's playing song to Cider",
                 "New \"Cider Remote\" title integrated in the screen's top bar"
             ], modifications: [
