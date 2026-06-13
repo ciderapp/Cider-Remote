@@ -19,6 +19,7 @@ struct Queue {
         let type: String
     }
 
+	/// Use only for v1 endpoint, helps defining the `offset`, and then find all the next tracks
     mutating func defineCurrent(track: Track) {
         guard let index = self.tracks.firstIndex(where: { $0.id == track.id }), self.tracks.count > 1 else { return }
         
@@ -32,6 +33,13 @@ struct Queue {
         self.tracks = Array(fx)
         self.offset = index + 1
     }
+
+	/// Use only for v2, fetches the `offset` from `GET /queue/position`, then fetches all tracks using `offset` query in `GET /queue`
+	mutating func fetchCurrent(device: Device) async {
+		guard device.useV2 else { return }
+
+		
+	}
 
     mutating func remove(set: IndexSet) {
         guard let first = set.first, let last = set.last else { return }

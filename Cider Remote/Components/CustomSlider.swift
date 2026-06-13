@@ -4,16 +4,17 @@ import SwiftUI
 
 struct CustomSlider: View {
     @Binding var value: Double
-    @EnvironmentObject var colorScheme: ColorSchemeManager
-    let bounds: ClosedRange<Double>
     @Binding var isDragging: Bool
-    let onEditingChanged: (Bool) -> Void
 
-    @State private var lastDragValue: Double?
+    var bounds: ClosedRange<Double> = 1...10
+    var onEditingChanged: (Bool) -> Void = {_ in}
+
+    @State private var lastDragValue: Double? = nil
+
 
     var body: some View {
         GeometryReader { geometry in
-            let sliderHeight: CGFloat = isDragging ? 14 : 8
+            let sliderHeight: CGFloat = isDragging ? 20 : 8
 
             ZStack(alignment: .leading) {
                 Rectangle()
@@ -30,7 +31,7 @@ struct CustomSlider: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { gestureValue in
-                        withAnimation(.interactiveSpring.speed(0.35)) {
+                        withAnimation(.interactiveSpring) {
                             isDragging = true
                         }
                         let newValue = bounds.lowerBound + (bounds.upperBound - bounds.lowerBound) * Double(gestureValue.location.x / geometry.size.width)
@@ -46,7 +47,7 @@ struct CustomSlider: View {
                         }
                     }
                     .onEnded { _ in
-                        withAnimation(.interactiveSpring.speed(0.35)) {
+                        withAnimation(.interactiveSpring) {
                             isDragging = false
                         }
                         lastDragValue = nil

@@ -1,6 +1,15 @@
 {
-  "originHash" : "5833576ad107b5ee8f4d75f2c39364248b5a238e2abff4e5002227a1c937a190",
+  "originHash" : "c86d3653a5b9212f939d5cc72eb9e010f989e8f5aeb1c6feab2d3cd9d475cf53",
   "pins" : [
+    {
+      "identity" : "lyricsstudiokit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/the-amber-team/LyricsStudioKit",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e1a22da3c75c00069ea26554ca6934139be65e25"
+      }
+    },
     {
       "identity" : "socket.io-client-swift",
       "kind" : "remoteSourceControl",

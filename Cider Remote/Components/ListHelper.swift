@@ -7,14 +7,15 @@ struct GuideStep: View {
     let text: String
     
     var body: some View {
-        HStack(alignment: .top, spacing: 15) {
+		HStack(alignment: .firstTextBaseline, spacing: 15) {
             Text("\(number)")
                 .font(.headline)
                 .foregroundStyle(.white)
                 .frame(width: 30, height: 30)
-                .background(Circle().fill(Color.blue))
-            
+				.background(Circle().fill(Color.cider))
+
             Text(text)
+				.font(.callout)
         }
     }
 }

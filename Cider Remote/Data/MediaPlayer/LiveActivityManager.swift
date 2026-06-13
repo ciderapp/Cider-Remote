@@ -26,8 +26,12 @@ class LiveActivityManager {
             return
         }
 
-        do {
-            let cont: NowPlayingLiveActivity.NowPlayingAttributes.ContentState = .init(trackInfo: track)
+        Task {
+            let display: DisplayingTrack = Self.DisplayingTrack(from: track)
+            let cont: NowPlayingLiveActivity.NowPlayingAttributes.ContentState = .init(
+                trackInfo: display
+            )
+            
             if #available(iOS 16.2, *) {
                 self.lastActivity = try Activity
                     .request(
@@ -38,13 +42,12 @@ class LiveActivityManager {
                 self.lastActivity = try Activity.request(attributes: .init(device: device), contentState: cont)
             }
             print("STARTED LIVE ACTIVITY")
-        } catch {
-            print("Error while starting Live Activity: \(error)")
         }
     }
 
     func updateActivity(with content: NowPlayingLiveActivity.NowPlayingAttributes.ContentState) async {
         guard let activity else { return }
+
         await activity
             .update(
                 .init(state: content, staleDate: nil),
@@ -59,9 +62,14 @@ class LiveActivityManager {
 
     func updateActivity(with track: Track) async {
         guard let activity else { return }
+
+        let display: DisplayingTrack = Self.DisplayingTrack(from: track)
+        let state: NowPlayingLiveActivity.NowPlayingAttributes.ContentState = .init(
+            trackInfo: display
+        )
+
         await activity
-            .update(
-                .init(state: .init(trackInfo: track), staleDate: nil),
+            .update(.init(state: state, staleDate: nil),
                 alertConfiguration: alertLiveActivity ? .init(
                     title: "Cider Remote",
                     body: "Now Playing: \(track.title) by \(track.artist)",
@@ -83,4 +91,38 @@ class LiveActivityManager {
             print("STOPPED LIVE ACTIVITY")
         }
     }
+
+    struct DisplayingTrack: Identifiable, Codable, Equatable {
+        let id: String
+        let title: String
+        let artist: String
+        let artworkURL: URL?
+
+        init(title: String, artist: String, artworkURL: URL? = nil) {
+            self.id = UUID().uuidString
+            self.title = title
+            self.artist = artist
+            self.artworkURL = artworkURL
+        }
+
+        init(from track: Track) {
+            self.id = track.id
+            self.title = track.title
+            self.artist = track.artist
+            self.artworkURL = URL(string: track.artwork)
+        }
+
+        func getArtworkData() async -> Data? {
+            guard let artworkURL else { return nil }
+            
+            do {
+                let (data, _) = try await URLSession.shared.data(from: artworkURL)
+                return data
+            } catch {
+                print("Error loading image: \(error)")
+            }
+            return nil
+        }
+    }
 }
+

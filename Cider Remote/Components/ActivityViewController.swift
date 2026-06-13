@@ -12,7 +12,7 @@ struct ActivityViewController: UIViewControllerRepresentable {
                 if let url: URL = URL(string: "https://music.apple.com/us/song/\(track.catalogId)") {
                     return UIActivityViewController(activityItems: [url], applicationActivities: nil)
                 } else {
-                    let ui: UIImage = track.getArtwork()
+                    let ui: UIImage = track.getArtworkLocally()
                     return UIActivityViewController(activityItems: [ui], applicationActivities: nil)
                 }
 

@@ -87,7 +87,6 @@ struct BrowserView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 7.0))
                     }
                 }
-                .plainGlassButton()
                 .disabled(self.isLoadingMore)
                 .padding(.top, 15.0)
                 .padding(.bottom, 5.0)
@@ -142,47 +141,20 @@ struct BrowserView: View {
         Button {
             sheetVisible.wrappedValue.toggle()
         } label: {
-            if #available(iOS 26.0, *) {
-                HStack(alignment: .center, spacing: 14) {
-                    Image(systemName: "play.square.stack.fill")
-                        .imageScale(.large)
-                        .foregroundStyle(Color.white)
+            HStack(alignment: .center, spacing: 14) {
+                Image(systemName: "play.square.stack.fill")
+                    .imageScale(.medium)
+                    .foregroundStyle(Color.white)
 
-                    Text("View Library")
-                        .font(.body.bold())
-                        .foregroundStyle(Color.white)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .glassEffect(.regular.interactive())
-            } else {
-                HStack(alignment: .center, spacing: 14) {
-                    Image(systemName: "play.square.stack.fill")
-                        .imageScale(.large)
-                        .foregroundStyle(Color.white)
-
-                    Text("View Library")
-                        .font(.body.bold())
-                        .foregroundStyle(Color.white)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .background {
-                    ZStack {
-                        Rectangle()
-                            .fill(Material.ultraThin)
-                            .zIndex(10)
-
-                        Rectangle()
-                            .fill(background.gradient)
-                            .opacity(0.6)
-                            .zIndex(1)
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                Text("View Library")
+                    .font(.callout.bold())
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
             }
+            .padding(.horizontal)
+            .padding(.vertical, 7.5)
         }
-        .plainGlassButton()
+        .buttonStyle(.glass)
     }
 }
 

@@ -5,69 +5,159 @@ import SwiftUI
 struct DevicesView: View {
     @Environment(\.dismiss) private var dismiss: DismissAction
 
-    private var devices: [Device] {
-        DeviceManager.shared.devices
-    }
-    @State var isRefreshing: Bool = false
-
     @AppStorage("refreshInterval") private var refreshInterval: Double = 10.0
+
+    @State private var isRefreshing: Bool = false
+    @State private var viewingDevice: Device? = nil
 
     @State private var scannedCode: String?
     @State private var isShowingScanner = false
     @State private var isShowingGuide = false
 
     @State private var activityCheckTimer: Timer? = nil
+    
+    // Send to Cider functionality
+    @StateObject private var currentMusicService = CurrentMusicService.shared
+    @State private var showingSendToCiderAlert = false
+    @State private var selectedDeviceForSending: Device?
+    @State private var isSendingToCider = false
+    @State private var sendResultAlert: SendResultAlert? = nil
+
+    private var devices: [Device] {
+        DeviceManager.shared.devices
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-
-            List {
+        List {
+            if devices.count > 0 {
                 ForEach(devices) { device in
-                    NavigationLink(value: device) {
-                        DeviceRowView(device: device)
+                    Button {
+                        self.viewingDevice = device
+                    } label: {
+                        DeviceRowView(device: device, hasCurrentMusic: currentMusicService.currentTrack?.hasValidData == true)
                     }
-                    .swipeActions(edge: .trailing) {
+                    .tint(Color.primary)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             DeviceManager.shared.remove(device)
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .tint(Color.red)
+
+                        Button {
+                            selectedDeviceForSending = device
+                            currentMusicService.updateCurrentTrack()
+                            // Add a small delay to allow track info to update
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                showingSendToCiderAlert = true
+                            }
+                        } label: {
+                            Label("Send to Cider", systemImage: "music.note.list")
+                        }
+                        .tint(Color.pink) // AM color? allegedly
+                        .disabled(!(currentMusicService.currentTrack?.hasValidData ?? false) || !device.isActive)
                     }
                 }
-
-                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { json in
-                    self.fetchDevices(from: json)
+            } else {
+                ContentUnavailableView {
+                    Text("No devices")
+                        .bold()
+                } description: {
+                    Text("Add a Cider device by tapping the plus icon in the top right corner. Troubleshoot errors with the button next to it.")
                 }
+                .listRowInsets(.all, 0.0)
+                .listRowSpacing(0.0)
+                .listRowBackground(Color.clear)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .task {
+            await self.refreshDevices()
+        }
+        .refreshable {
+            await self.refreshDevices()
+        }
 
-                Button(action: {
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                header
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
                     isShowingGuide = true
-                }) {
-                    Label("Connection Guide", systemImage: "questionmark.circle")
+                } label: {
+                    Label("Connection Guide", systemImage: "book.and.wrench")
+                        .foregroundStyle(Color.cider)
                 }
             }
-            .listStyle(InsetGroupedListStyle())
-            .task {
-                await self.refreshDevices()
+
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+
+            ToolbarItem(placement: .topBarTrailing) {
+                AddDeviceView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode) { connection in
+					DeviceManager.shared.connectionInfo = connection
+					AppPrompt.shared.showingPrompt = .newDevice
+                }
+                .buttonStyle(.glassProminent)
+                .tint(Color.cider)
             }
-            .refreshable {
-                await self.refreshDevices()
-            }
-#if DEBUG
-            Label("This is a DEBUG version.", systemImage: "gearshape.2.fill")
-                .foregroundStyle(.orange)
-                .accessibility(label: Text("Debug software"))
-#endif
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: Device.self) { device in
-            LazyView(MusicPlayerView(device: device))
+        .navigationDestination(item: $viewingDevice) { device in
+            MusicPlayerView(device: device)
+                .tint(Color.cider)
         }
         .sheet(isPresented: $isShowingGuide) {
             ConnectionGuideView()
         }
+        .alert("Send to Cider", isPresented: $showingSendToCiderAlert) {
+            Button("Cancel", role: .cancel) { }
+            if !currentMusicService.hasMediaAccess {
+                Button("Grant Permission") {
+                    // This will trigger permission request
+                    currentMusicService.updateCurrentTrack()
+                }
+            } else if let track = currentMusicService.currentTrack, track.hasValidData {
+                Button("Send") {
+                    if let device = selectedDeviceForSending {
+                        sendCurrentMusicToCider(device: device)
+                    }
+                }
+                .disabled(isSendingToCider)
+            } else {
+                Button("Refresh") {
+                    currentMusicService.updateCurrentTrack()
+                    // Re-show alert after refresh
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        showingSendToCiderAlert = true
+                    }
+                }
+            }
+        } message: {
+            if !currentMusicService.hasMediaAccess {
+                Text("This app needs permission to access your media library to detect currently playing music. Please grant permission to continue.")
+            } else if let track = currentMusicService.currentTrack, track.hasValidData {
+                if isSendingToCider {
+                    Text("Sending \"\(track.title)\" by \(track.artist) to \(selectedDeviceForSending?.friendlyName ?? "Cider")...")
+                } else {
+                    Text("Send \"\(track.title)\" by \(track.artist) to \(selectedDeviceForSending?.friendlyName ?? "Cider")?")
+                }
+            } else {
+                Text("No music is currently playing on this device. Start playing music in Apple Music, Spotify, or another music app, then try 'Refresh'.")
+            }
+        }
+        .alert(item: $sendResultAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .onAppear {
             self.startActivityChecking()
+            currentMusicService.updateCurrentTrack()
         }
         .onDisappear {
             self.stopActivityChecking()
@@ -81,13 +171,11 @@ struct DevicesView: View {
                 .scaledToFit()
                 .frame(height: 40)
 
-            Text("Cider Devices")
+            Text("Remote")
                 .font(.title2)
                 .fontWeight(.bold)
         }
-        .padding()
         .frame(maxWidth: .infinity)
-        .background(Material.ultraThick)
     }
 
     @MainActor
@@ -115,25 +203,6 @@ struct DevicesView: View {
         isRefreshing = false
     }
 
-    func fetchDevices(from jsonString: String) {
-        print("Received JSON string: \(jsonString)")  // Log the received JSON string
-
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            print("Error: Unable to convert JSON string to Data")
-            AppPrompt.shared.showingPrompt = .oldDevice
-            return
-        }
-
-        do {
-            let connectionInfo = try JSONDecoder().decode(ConnectionInfo.self, from: jsonData)
-            DeviceManager.shared.connectionInfo = connectionInfo
-            AppPrompt.shared.showingPrompt = .newDevice
-        } catch {
-            print("Error decoding ConnectionInfo: \(error)")
-            AppPrompt.shared.showingPrompt = .oldDevice
-        }
-    }
-
     private func finishRefreshing() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.isRefreshing = false
@@ -155,4 +224,36 @@ struct DevicesView: View {
         activityCheckTimer?.invalidate()
         activityCheckTimer = nil
     }
+    
+    private func sendCurrentMusicToCider(device: Device) {
+        guard !isSendingToCider else { return }
+        
+        isSendingToCider = true
+        
+        Task {
+            let success = await currentMusicService.sendToCider(device: device)
+            
+            await MainActor.run {
+                isSendingToCider = false
+                
+                if success {
+                    sendResultAlert = SendResultAlert(
+                        title: "Success",
+                        message: "Successfully sent music to \(device.friendlyName)"
+                    )
+                } else {
+                    sendResultAlert = SendResultAlert(
+                        title: "Failed",
+                        message: "Could not send music to \(device.friendlyName). Make sure the device is connected and try again."
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct SendResultAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }

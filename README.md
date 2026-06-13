@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://cider.sh/remote">
-        <img src="https://cider.sh/og-remote.png" alt="Cider Remote Banner">
+        <img src="./README_data/AppBanner.png" alt="Cider Remote Banner">
     </a>
     <a href="https://apps.apple.com/app/id6670149407">
         <img src="https://apps.lumaa.fr/assets/images/en_app_store_black_badge.svg" alt="Cider Remote on the App Store" width=200 />
@@ -14,17 +14,18 @@
 
 [Cider Remote](https://cider.sh/remote) is a native iOS app, built with [SwiftUI](https://developer.apple.com/swiftui/) and [Socket.io](https://socket.io/), that gives remote controls to [Cider](https://cider.sh/); Graciously maintained by [Lumaa](https://github.com/lumaa-dev)!
 
-> [!NOTE]
-> Cider Remote is also available on Android: [`ciderapp/Cider-Remote-RN`](https://github.com/ciderapp/Cider-Remote-RN)
-
 [Cider Remote](https://cider.sh/remote) is the official [Cider](https://cider.sh/) remote control app on iPhone and iPad using iOS 17 or later, with these features:
 
+> [!NOTE]
+> Remote 4.0.0 should work with previous version of Cider 
+
 - Seamless communications between [Remote](https://cider.sh/remote) and [Cider](https://cider.sh/)
-- Live Activity with the playing track and quick actions ([ActivityKit](https://developer.apple.com/documentation/ActivityKit))
+- Live Activity with the playing track and quick actions ([ActivityKit](https://developer.apple.com/documentation/ActivityKit), iOS 16.1+)
 - Horizontal Layout (Landscape)
 - Queue Management
+- [Taproom](https://taproom.cider.sh/)'s Lyrics Studio ([LyricsStudioKit](https://github.com/The-Amber-Team/LyricsStudioKit), iOS 16+)
 - Apple Music & MusixMatch Lyrics (+ Immersive Lyrics in Horizontal Layout)
-- Siri Shortcuts actions ([App Intents](https://developer.apple.com/documentation/appintents))
+- Siri Shortcuts actions ([App Intents](https://developer.apple.com/documentation/appintents), iOS 16+)
 - Control Center actions ([WidgetKit](https://developer.apple.com/documentation/widgetkit/creating-controls-to-perform-actions-across-the-system#Add-a-control-toggle-to-your-app), iOS 18+)
 - Liquid Glass design (iOS 26+)
 
@@ -119,4 +120,8 @@ Join the [TestFlight beta](https://testflight.apple.com/join/qTeV2T2w) here.
 
 This project is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license. See the [LICENSE](./LICENSE) file for details.
 
-© Cider Collective 2024-2025
+© Cider Collective 2024-2026
+
+# Android
+
+Cider Remote is also available on Android: [`ciderapp/Cider-Remote-RN`](https://github.com/ciderapp/Cider-Remote-RN). There should also be a separate Cider client on Android coming soon.

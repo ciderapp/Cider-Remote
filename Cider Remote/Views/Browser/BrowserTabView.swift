@@ -86,7 +86,6 @@ struct BrowserTabView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 7.0))
                 }
             }
-            .plainGlassButton()
             .disabled(self.isLoadingMore)
             .padding(.top, 15.0)
             .padding(.bottom, 5.0)
