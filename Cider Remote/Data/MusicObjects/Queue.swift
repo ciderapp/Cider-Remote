@@ -35,8 +35,30 @@ struct Queue {
     }
 
 	/// Use only for v2, fetches the `offset` from `GET /queue/position`, then fetches all tracks using `offset` query in `GET /queue`
-	mutating func fetchCurrent(device: Device) async {
-		guard device.useV2 else { return }
+	mutating func fetchCurrent(device: Device, fetchQueue: Bool = true) async throws {
+		guard device.useV2 else { throw NetworkError.invalidURL }
+
+		guard let reqRes: [String: Any] = try await device.sendRequest(endpoint: "queue/position") as? [String: Any] else { throw NetworkError.invalidResponse }
+		let data: Data = try JSONSerialization.data(withJSONObject: reqRes)
+		let pos = try JSONDecoder().decode(QueuePosition.self, from: data)
+
+		if pos.position >= pos.total - 1 {
+			self.tracks = []
+			self.offset = pos.total
+			return
+		}
+
+		self.offset = pos.position
+		if fetchQueue {
+			guard let queue: [[String: Any]] = (try await device.sendRequest(endpoint: "queue", queries: [.init(name: "limit", value: "20"), .init(name: "offset", value: "\(pos.position + 1)")]) as? [String: Any])?["items"] as? [[String: Any]] else {
+				throw NetworkError.invalidResponse
+			} // this is so ass code for real TODO: fix this shit next version with actual `Codable`s
+
+			self.tracks = queue.compactMap { getTrack(using: $0) }
+		} else {
+			let fx = self.tracks[pos.position + 1...max(self.tracks.count - 1, pos.position + 1)]
+			self.tracks = Array(fx)
+		}
 	}
 
     mutating func remove(set: IndexSet) {
@@ -59,4 +81,41 @@ struct Queue {
         guard let i = tracks.firstIndex(of: track) else { return -1 }
         return i + offset
     }
+
+	private func getTrack(using info: [String: Any]) -> Track? {
+		guard let attributes = (info["track"] as? [String : Any])?["attributes"] as? [String: Any] else { return nil }
+
+		let id = (info["track"] as? [String : Any])?["id"] as? String ?? ""
+		let title = attributes["name"] as? String ?? ""
+		let artist = attributes["artistName"] as? String ?? ""
+		let album = attributes["albumName"] as? String ?? ""
+		let duration = attributes["durationInMillis"] as? Double ?? 0
+
+		if let artwork = attributes["artwork"] as? [String: Any],
+		   var artworkUrl = artwork["url"] as? String {
+			// Replace placeholders in artwork URL
+			artworkUrl = artworkUrl.replacingOccurrences(of: "{w}", with: "1024")
+			artworkUrl = artworkUrl.replacingOccurrences(of: "{h}", with: "1024")
+
+			return Track(id: id,
+						 catalogId: id,
+						 title: title,
+						 artist: artist,
+						 album: album,
+						 artwork: artworkUrl,
+						 duration: duration / 1000,
+						 artworkData: Data()
+			)
+		} else {
+			return Track(id: id,
+						 catalogId: id,
+						 title: title,
+						 artist: artist,
+						 album: album,
+						 artwork: "",
+						 duration: duration / 1000,
+						 artworkData: Data()
+			)
+		}
+	}
 }

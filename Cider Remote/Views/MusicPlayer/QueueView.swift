@@ -35,6 +35,9 @@ struct QueueView<Content : View>: View {
             .ciderOptimized()
         }
         .foregroundStyle(.primary)
+		.task {
+			await fetchQueueItems()
+		}
     }
 
     @ViewBuilder
@@ -155,7 +158,8 @@ struct QueueView<Content : View>: View {
         guard let sourceQueue else { return }
         do {
 			let path: String = device.useV2 ? "queue/items/\(index + sourceQueue.offset)" : "playback/queue/remove-by-index"
-            _ = try await device.sendRequest(endpoint: "playback/queue/remove-by-index", method: "POST", body: ["index": index + sourceQueue.offset]) // body unused in v2
+			let method: String = device.useV2 ? "DELETE" : "POST"
+            _ = try await device.sendRequest(endpoint: path, method: method, body: ["index": index + sourceQueue.offset]) // body unused in v2
         } catch {
             print(error)
         }
@@ -187,19 +191,28 @@ struct QueueView<Content : View>: View {
         guard let currentTrack else { print("[QUEUE] Need currentTrack to get current queue"); return }
 
         print("Fetching current queue")
-        do {
-			let path: String = device.useV2 ? "queue" : "playback/queue"
-            let data = try await device.sendRequest(endpoint: path)
-            if let jsonDict = data as? [[String: Any]] {
-                let attributes: [[String : Any]] = jsonDict.compactMap { $0["attributes"] as? [String : Any] }
-                let queue: [Track] = attributes.map { getTrack(using: $0) }
+		do {
+			if device.useV2 {
+				// v2
+				var queueItem = Queue(tracks: [])
+				try await queueItem.fetchCurrent(device: device)
 
-                var queueItem: Queue = .init(tracks: queue)
-                queueItem.defineCurrent(track: currentTrack)
+				self.sourceQueue = queueItem
+				self.queueItems = queueItem.tracks
+			} else {
+				let data = try await device.sendRequest(endpoint: "playback/queue")
+				if let jsonDict = data as? [[String: Any]] {
+					// v1
+					let attributes: [[String : Any]] = jsonDict.compactMap { $0["attributes"] as? [String : Any] }
+					let queue: [Track] = attributes.map { getTrack(using: $0) }
 
-                self.sourceQueue = queueItem // after defining offset
-                self.queueItems = queueItem.tracks
-            }
+					var queueItem: Queue = .init(tracks: queue)
+					queueItem.defineCurrent(track: currentTrack)
+
+					self.sourceQueue = queueItem // after defining offset
+					self.queueItems = queueItem.tracks
+				}
+			}
         } catch {
             print(error)
         }

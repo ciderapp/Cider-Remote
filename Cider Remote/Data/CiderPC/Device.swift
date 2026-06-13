@@ -164,14 +164,16 @@ extension Device {
         }
     }
 
-	func sendRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, version: String? = nil) async throws -> Any {
+	func sendRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, queries: [URLQueryItem] = [], version: String? = nil) async throws -> Any {
 		let clientVersion: String = self.useV2 ? "v2" : "v1"
 		let v: String = version ?? clientVersion
 
 		let baseURL = self.connectionMethod == .tunnel ? "https://\(self.host)" : "http://\(self.host):10767"
-        guard let url = URL(string: "\(baseURL)/api/\(v)/\(endpoint)") else {
+        guard var url = URL(string: "\(baseURL)/api/\(v)/\(endpoint)") else {
             throw NetworkError.invalidURL
         }
+
+		url.append(queryItems: queries)
 
         print("Sending request to: \(url.absoluteString)")
 
@@ -213,4 +215,30 @@ extension Device {
             throw NetworkError.decodingError
         }
     }
+
+	func sendForData<ResponseData: Decodable>(endpoint: String, method: String = "GET", body: [String: Any]? = nil, queries: [URLQueryItem] = [], version: String? = nil) async throws -> APIResponse<ResponseData, ResponseData> {
+		guard let res: [String: Any] = try await self.sendRequest(
+			endpoint: endpoint,
+			method: method,
+			body: body,
+			queries: queries,
+			version: version
+		) as? [String: Any] else { throw NetworkError.invalidResponse }
+
+		let data: Data = try JSONSerialization.data(withJSONObject: res)
+		return try JSONDecoder().decode(APIResponse<ResponseData, ResponseData>.self, from: data)
+	}
+
+	func sendForMetaData<ResponseData: Decodable, MetaData: Decodable>(endpoint: String, method: String = "GET", body: [String: Any]? = nil, queries: [URLQueryItem] = [], version: String? = nil) async throws -> APIResponse<ResponseData, MetaData> {
+		guard let res: [String: Any] = try await self.sendRequest(
+			endpoint: endpoint,
+			method: method,
+			body: body,
+			queries: queries,
+			version: version
+		) as? [String: Any] else { throw NetworkError.invalidResponse }
+
+		let data: Data = try JSONSerialization.data(withJSONObject: res)
+		return try JSONDecoder().decode(APIResponse<ResponseData, MetaData>.self, from: data)
+	}
 }
