@@ -163,6 +163,7 @@ struct AdditionalControls: View {
         } label: {
             Image(systemName: "ellipsis")
                 .foregroundStyle(Color.white.opacity(0.6))
+                .padding(8)
                 .frame(width: buttonSize.dimension * (UIDevice.current.userInterfaceIdiom == .pad ? 1.1 : 1.0), height: buttonSize.dimension * (UIDevice.current.userInterfaceIdiom == .pad ? 1.1 : 1.0))
         }
         .buttonStyle(SpringyButtonStyle())
